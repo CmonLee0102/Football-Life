@@ -29,11 +29,15 @@
   #appdecor img{position:absolute; width:min(48vw,640px); opacity:.045; filter:grayscale(.15) blur(.5px);}
   #appdecor .l{left:-7vw; top:9vh; transform:rotate(-9deg);}
   #appdecor .r{right:-7vw; bottom:7vh; transform:rotate(9deg);}
-  /* 遊戲整體比例 90% */
-  #app{width:calc(100% / 0.9); height:calc(100dvh / 0.9); transform:scale(0.9); transform-origin:top left;
+  /* 手機：滿版原尺寸，字體與間距清楚不擠、不側滑 */
+  #app{width:100%; height:100dvh; max-width:100%; overflow-x:hidden;
     display:flex; flex-direction:column; position:relative; z-index:1;}
+  /* 桌機才套用整體 90% 比例（手機縮放會讓內容變小又擠） */
+  @media (min-width:721px){
+    #app{width:calc(100% / 0.9); height:calc(100dvh / 0.9); transform:scale(0.9); transform-origin:top left;}
+  }
   /* 置中的 App 主欄，坐落在氛圍背景之上 */
-  #root{display:flex; flex-direction:column; flex:1; min-height:0; width:100%; max-width:920px; margin:0 auto;
+  #root{display:flex; flex-direction:column; flex:1; min-height:0; width:100%; max-width:920px; margin:0 auto; overflow-x:hidden;
     background:linear-gradient(180deg,rgba(16,16,20,.72),rgba(6,6,9,.72));
     backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
     box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 40px 120px rgba(0,0,0,.6);}
@@ -46,6 +50,23 @@
   .home-center{margin:auto 0; width:100%;}
   /* 內容多時子元素不被 flex 壓縮，改為正常捲動（避免按鈕被擠扁） */
   .screen > *{flex-shrink:0;}
+  /* 圖片/向量圖不超出容器，避免水平側滑 */
+  img, svg, canvas, video{max-width:100%;}
+  /* 手機排版：兩欄容器自動改單欄堆疊、拉開間距、不擁擠、不側滑 */
+  @media (max-width:640px){
+    /* 內嵌 min-width 欄位在窄螢幕歸零，讓 flex-wrap 乾淨堆疊、不撐出橫向捲動 */
+    [style*="min-width:280px"],[style*="min-width:300px"],[style*="min-width:190px"]{min-width:0 !important;}
+    .screen{padding:14px 13px 26px;}
+    .card{padding:14px; margin-bottom:12px;}
+    h1{font-size:21px;}
+    h2{font-size:14.5px; margin:14px 0 8px;}
+    .kv{font-size:13.5px; padding:9px 0;}
+    header{padding:12px 14px; gap:11px;}
+    .avatar{width:50px; height:50px;}
+    .hd-name{font-size:17px;}
+    .hd-money{font-size:18px;}
+    nav button{font-size:13px; padding:9px 2px;}
+  }
   /* 桌機：主欄變成漂浮的圓角面板，坐落在品牌背景之上 */
   @media (min-width:720px){
     #root{border-radius:24px; margin-top:20px; margin-bottom:20px; overflow:hidden;}
@@ -101,6 +122,8 @@
 
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
   .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
+  .sc-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  @media (max-width:480px){ .sc-grid{grid-template-columns:1fr 1fr; gap:10px;} }
 
   .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
     background:var(--panel2); border:1px solid var(--line);}
@@ -143,6 +166,25 @@
   .choice .cost{margin-left:auto; font-size:11px; color:var(--gold); font-weight:800;}
 
   /* Log feed */
+  .spon-list{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+  .spon-card{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px;
+    background:linear-gradient(150deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+    border:1px solid rgba(255,255,255,.08); transition:border-color .15s, transform .1s;}
+  .spon-card:not(.lock):not(.done):hover{border-color:rgba(245,196,81,.4);}
+  .spon-card.lock{opacity:.5;}
+  .spon-card.done{border-color:rgba(120,220,140,.35); background:linear-gradient(150deg,rgba(90,200,120,.08),rgba(255,255,255,.01));}
+  .spon-ic{font-size:32px; width:44px; text-align:center; flex-shrink:0;}
+  .spon-mid{flex:1; min-width:0;}
+  .spon-name{font-weight:800; font-size:15px;}
+  .spon-req{font-size:10px; font-weight:700; color:var(--dim); background:rgba(255,255,255,.06); border-radius:6px; padding:1px 6px; margin-left:4px; vertical-align:middle;}
+  .spon-desc{font-size:11.5px; color:var(--muted,#9a9a9a); line-height:1.45; margin:3px 0 5px;}
+  .spon-pay{font-weight:800; font-size:14px; color:var(--gold);}
+  .spon-pay .spon-per{font-size:11px; color:var(--dim); font-weight:600; margin-left:1px;}
+  .spon-right{flex-shrink:0;}
+  .spon-sign{width:auto; margin:0; padding:9px 18px;}
+  .spon-tag{font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px; white-space:nowrap;}
+  .spon-tag.done{color:#7fe0a0; background:rgba(120,220,140,.14);}
+  .spon-tag.lock{color:var(--dim); background:rgba(255,255,255,.06);}
   .howto{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015));}
   .howto-head{display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;}
   .howto-body{margin-top:12px; display:flex; flex-direction:column; gap:12px;}
@@ -975,7 +1017,7 @@ function startClubsHTML(){
   _startClubs=leagueClubs(startLeague);
   if(!_startClubs.length) return '<div class="muted center" style="padding:16px;">此聯賽暫無球隊</div>';
   return `<div style="text-align:center; margin:2px 0 10px; font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px;">${leagueLogo(startLeague,28)} ${startLeague}</div>
-  <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;">
+  <div class="sc-grid">
     ${_startClubs.map((o,i)=>{
       const d=TIER_DIFF[o.tier];
       return `<div class="card tap" onclick="chooseStartClub(${i})" style="padding:10px; margin:0; text-align:center;">
@@ -1065,6 +1107,7 @@ function renderScreen(){
     case "train": return screenTrain();
     case "life": return screenLife();
     case "market": return screenMarket();
+    case "sponsor": return screenSponsor();
   }
   return "";
 }
@@ -1633,16 +1676,68 @@ function invest(type,name,cost){
   toast(diff>=0?`賺了 ${moneyStr(diff)}！`:`賠了 ${moneyStr(Math.abs(diff))}…`);
   checkMilestones(); save(); render();
 }
+const SPONSOR_BRANDS=[
+  {ico:"👟",name:"Nike",req:20,desc:"全球運動品牌龍頭，簽名球鞋計畫。"},
+  {ico:"⚡",name:"Adidas",req:30,desc:"三條線傳奇，頂級球星代言陣容。"},
+  {ico:"🥤",name:"可口可樂",req:40,desc:"世界級飲料品牌，形象廣告主角。"},
+  {ico:"🎮",name:"EA Sports",req:35,desc:"足球遊戲封面人物，曝光度爆表。"},
+  {ico:"⌚",name:"Rolex",req:55,desc:"頂級精品腕錶，只找傳奇級球星。"},
+  {ico:"📱",name:"三星",req:45,desc:"科技巨頭，全球代言合約。"},
+  {ico:"🏦",name:"當地銀行",req:10,desc:"新秀友善，第一份代言的好選擇。"},
+  {ico:"🍺",name:"啤酒品牌",req:25,desc:"接地氣的在地行銷合作。"},
+];
+// 代言費：依名氣、社群、品牌等級計算（顯示與簽約一致，不用隨機）
+function sponsorPay(b){ return Math.round((b.req+G.fame)*(1+G.socialFollowers/50)*(3+b.req/25)); }
+function screenSponsor(){
+  const signed=new Set(G.sponsors.map(s=>s.name));
+  const list=SPONSOR_BRANDS.slice().sort((a,b)=>a.req-b.req).map(b=>{
+    const has=signed.has(b.name);
+    const ok=G.fame>=b.req;
+    const pay=sponsorPay(b);
+    let right, cls, click='';
+    if(has){ right=`<span class="spon-tag done">✅ 已簽約</span>`; cls='spon-card done'; }
+    else if(!ok){ right=`<span class="spon-tag lock">🔒 需名氣 ${b.req}</span>`; cls='spon-card lock'; }
+    else { right=`<button class="btn gold spon-sign" onclick="signBrand('${b.name}')">簽約</button>`; cls='spon-card'; }
+    return `<div class="${cls}">
+      <div class="spon-ic">${b.ico}</div>
+      <div class="spon-mid">
+        <div class="spon-name">${b.name} <span class="spon-req">名氣 ${b.req}</span></div>
+        <div class="spon-desc">${b.desc}</div>
+        <div class="spon-pay">💰 ${moneyStr(pay)}<span class="spon-per">/季</span></div>
+      </div>
+      <div class="spon-right">${right}</div>
+    </div>`;
+  }).join("");
+  return `
+    <div style="display:flex; align-items:center; gap:10px; margin:6px 0 2px;">
+      <button class="btn sec" style="width:auto; padding:8px 14px; margin:0;" onclick="nav('market')">← 返回</button>
+      <h2 style="margin:0;">🔍 贊助商市場</h2>
+    </div>
+    <p class="muted" style="margin:4px 0 12px;">名氣越高，能吸引的品牌越大、代言費越高。已簽約的品牌每季自動入帳。</p>
+    <div class="card" style="background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015));">
+      <div class="kv"><span class="k">目前名氣</span><span class="v" style="color:var(--gold);">${Math.round(G.fame)} / 100</span></div>
+      <div class="kv"><span class="k">社群粉絲</span><span class="v">${G.socialFollowers.toFixed(1)} 萬</span></div>
+      <div class="kv"><span class="k">現有代言</span><span class="v">${G.sponsors.length} 份</span></div>
+    </div>
+    <div class="spon-list">${list}</div>
+  `;
+}
+function signBrand(name){
+  const b=SPONSOR_BRANDS.find(x=>x.name===name); if(!b) return;
+  if(G.sponsors.find(s=>s.name===name)){ toast("已經簽過這個品牌了"); return; }
+  if(G.fame<b.req){ toast("名氣不足，先打出名堂"); return; }
+  const pay=sponsorPay(b);
+  G.sponsors.push({ico:b.ico,name:b.name,pay});
+  logEvent("🤝",`與 ${b.name} 簽下代言合約 ${moneyStr(pay)}/季。`,"log-gold");
+  toast(`${b.name} 代言到手！`);
+  checkMilestones(); save(); render();
+}
 function findSponsor(){
-  const brands=[
-    {ico:"👟",name:"Nike",req:20},{ico:"⚡",name:"Adidas",req:30},{ico:"🥤",name:"可口可樂",req:40},
-    {ico:"🎮",name:"EA Sports",req:35},{ico:"⌚",name:"Rolex",req:55},{ico:"📱",name:"三星",req:45},
-    {ico:"🏦",name:"當地銀行",req:10},{ico:"🍺",name:"啤酒品牌",req:25},
-  ];
+  const brands=SPONSOR_BRANDS;
   const avail=brands.filter(b=>G.fame>=b.req && !G.sponsors.find(s=>s.name===b.name));
   if(!avail.length){ toast(G.sponsors.length?"名氣不足以吸引新品牌":"名氣太低，先打出名堂"); return; }
   const b=pick(avail);
-  const pay=Math.round((b.req+G.fame)* (1+G.socialFollowers/50) *rand(3,6));
+  const pay=sponsorPay(b);
   showEvent({emoji:b.ico,title:"贊助邀約",text:`${b.name} 對你有興趣，開出 ${moneyStr(pay)}/季 的代言合約！`,
     choices:[
       {i:"✍️",t:"簽約",fn:()=>{G.sponsors.push({ico:b.ico,name:b.name,pay}); logEvent("🤝",`與 ${b.name} 簽下代言合約 ${moneyStr(pay)}/季。`,"log-gold"); toast("代言到手！");}},
