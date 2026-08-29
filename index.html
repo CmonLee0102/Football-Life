@@ -49,6 +49,16 @@
   @media (min-width:560px){ .screen{padding:20px 24px 28px;} }
   /* 首頁內容垂直置中（內容多時仍可正常捲動） */
   .home-center{margin:auto 0; width:100%;}
+  /* 首頁整體外框：灰色框把所有內容框起來（仿 Racing Life 的漂浮面板） */
+  .home-frame{border:1px solid rgba(185,189,201,.28); border-radius:26px; padding:26px 22px 28px; margin:12px 0 8px;
+    background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.20));
+    box-shadow:0 22px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);}
+  @media (max-width:640px){ .home-frame{padding:18px 14px 20px; border-radius:20px; margin:8px 0 8px;} }
+  .home-title{margin-top:12px; font-size:26px; font-weight:900; letter-spacing:6px; line-height:1.1;
+    background:linear-gradient(180deg,#ffe9a8,#f5c451 55%,#d99b1f); -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:var(--gold); filter:drop-shadow(0 2px 10px rgba(245,196,81,.28));}
+  .home-sub{margin-top:8px; font-size:10.5px; letter-spacing:2px; color:var(--dim); font-weight:700; text-transform:uppercase;}
+  .home-divider{height:1px; margin:16px 2px 2px; background:linear-gradient(90deg,transparent,rgba(245,196,81,.4),transparent);}
   /* 內容多時子元素不被 flex 壓縮，改為正常捲動（避免按鈕被擠扁） */
   .screen > *{flex-shrink:0;}
   /* 圖片/向量圖不超出容器，避免水平側滑 */
@@ -188,9 +198,17 @@
   .spon-tag{font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px; white-space:nowrap;}
   .spon-tag.done{color:#7fe0a0; background:rgba(120,220,140,.14);}
   .spon-tag.lock{color:var(--dim); background:rgba(255,255,255,.06);}
-  .howto{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015));}
+  .howto{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015)); transition:border-color .25s;}
+  .howto.open{border-color:rgba(245,196,81,.3);}
   .howto-head{display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;}
-  .howto-body{margin-top:12px; display:flex; flex-direction:column; gap:12px;}
+  .howto-arrow{display:inline-block; transition:transform .35s cubic-bezier(.4,0,.2,1);}
+  .howto.open .howto-arrow{transform:rotate(180deg);}
+  /* 用 grid-template-rows 0fr→1fr 做平滑高度展開，比 max-height 更自然 */
+  .howto-wrap{display:grid; grid-template-rows:0fr; transition:grid-template-rows .38s cubic-bezier(.4,0,.2,1);}
+  .howto.open .howto-wrap{grid-template-rows:1fr;}
+  .howto-body{min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:12px;
+    opacity:0; transform:translateY(-4px); transition:opacity .3s ease .05s, transform .3s ease .05s, margin-top .38s;}
+  .howto.open .howto-body{opacity:1; transform:none; margin-top:12px;}
   .howto-row{display:flex; gap:12px; align-items:flex-start;}
   .howto-ic{font-size:20px; flex-shrink:0; width:26px; text-align:center;}
   .howto-t{font-weight:800; font-size:13px; color:var(--gold);}
@@ -770,7 +788,12 @@ const BGS=[
 let setupStep=0, setupData={name:"",pos:"FW",nation:NATIONS[0],bg:null,spotIdx:null,role:null,ab:null,number:10,foot:"右"};
 let currentRegion='sa';
 let howToOpen=false;
-function toggleHowTo(){ howToOpen=!howToOpen; renderSetup(); }
+function toggleHowTo(){
+  howToOpen=!howToOpen;
+  const c=document.querySelector('.howto');
+  if(c) c.classList.toggle('open', howToOpen);
+  else renderSetup();
+}
 const HOWTO=[
   ["🎯","目標","從 16 歲青訓小將起步，一路踢到成為足球傳奇。"],
   ["⚽","比賽","每季出賽，過程中會有關鍵抉擇，影響評分與勝負。"],
@@ -784,11 +807,14 @@ function renderSetup(){
   if(setupStep===0){
     r.innerHTML=`
     <div class="screen fade">
-      <div style="text-align:center; margin:34px 0 10px;">
-        <img class="logo-stroke" src="${LOGO}" alt="Football Life" style="width:80%; max-width:300px;">
-        <div class="season-title" style="margin-top:14px;">足 球 生 涯</div>
+      <div class="home-frame">
+      <div style="text-align:center; margin:6px 0 4px;">
+        <img class="logo-stroke" src="${LOGO}" alt="Football Life" style="width:78%; max-width:300px;">
+        <div class="home-title">足 球 生 涯</div>
+        <div class="home-sub">FOOTBALL&nbsp;LIFE · 打造你的綠茵傳奇</div>
       </div>
-      <div class="card" style="margin-top:20px;">
+      <div class="home-divider"></div>
+      <div class="card" style="margin-top:16px;">
         <div style="display:flex; gap:16px; flex-wrap:wrap;">
           <div style="flex:1; min-width:190px;">
             <h2 style="margin-top:0;">📝 你的名字</h2>
@@ -807,15 +833,16 @@ function renderSetup(){
           </div>
         </div>
       </div>
-      <div class="card howto" style="margin-top:14px;">
+      <div class="card howto${howToOpen?' open':''}" style="margin-top:14px;">
         <div class="howto-head" onclick="toggleHowTo()">
           <span style="font-weight:800; font-size:15px;">📖 遊玩說明</span>
-          <span style="color:var(--gold); font-weight:800;">${howToOpen?'▲':'▼'}</span>
+          <span class="howto-arrow" style="color:var(--gold); font-weight:800;">▼</span>
         </div>
-        ${howToOpen?`<div class="howto-body">${HOWTO.map(([ic,t,d])=>`
-          <div class="howto-row"><div class="howto-ic">${ic}</div><div><div class="howto-t">${t}</div><div class="howto-d">${d}</div></div></div>`).join("")}</div>`:''}
+        <div class="howto-wrap"><div class="howto-body">${HOWTO.map(([ic,t,d])=>`
+          <div class="howto-row"><div class="howto-ic">${ic}</div><div><div class="howto-t">${t}</div><div class="howto-d">${d}</div></div></div>`).join("")}</div></div>
       </div>
       <button class="btn" onclick="setupNext()">下一步 →</button>
+      </div>
     </div>`;
     setTimeout(()=>{
       const i=$("#pname"); if(i) i.oninput=e=>setupData.name=e.target.value;
