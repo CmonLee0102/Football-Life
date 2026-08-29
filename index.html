@@ -55,8 +55,10 @@
   img, svg, canvas, video{max-width:100%;}
   /* 手機排版：兩欄容器自動改單欄堆疊、拉開間距、不擁擠、不側滑 */
   @media (max-width:640px){
-    /* 內嵌 min-width 欄位在窄螢幕歸零，讓 flex-wrap 乾淨堆疊、不撐出橫向捲動 */
-    [style*="min-width:280px"],[style*="min-width:300px"],[style*="min-width:190px"]{min-width:0 !important;}
+    /* 兩欄版面（聯賽/數據/訓練/生活/商業）在手機改為「垂直堆疊、各佔滿版」，
+       避免子欄被 min-width 撐開卻又硬擠在同一列而擠成一團。 */
+    [style*="align-items:flex-start"][style*="flex-wrap:wrap"]{flex-direction:column !important; gap:12px !important;}
+    [style*="align-items:flex-start"][style*="flex-wrap:wrap"] > *{width:100% !important; min-width:0 !important; flex:1 1 auto !important;}
     .screen{padding:14px 13px 26px;}
     .card{padding:14px; margin-bottom:12px;}
     h1{font-size:21px;}
