@@ -654,7 +654,22 @@ const CLUBS = {
     {n:"烏德勒支",l:"荷甲",c:"🇳🇱",fl:"fc-utrecht"},{n:"海倫芬",l:"荷甲",c:"🇳🇱",fl:"sc-heerenveen"},{n:"格羅寧根",l:"荷甲",c:"🇳🇱",fl:"fc-groningen"},{n:"前進之鷹",l:"荷甲",c:"🇳🇱",fl:"go-ahead-eagles"},
     {n:"奈梅亨",l:"荷甲",c:"🇳🇱",fl:"nec-nijmegen"},{n:"鹿特丹斯巴達",l:"荷甲",c:"🇳🇱",fl:"sparta-rotterdam"},{n:"茲沃勒",l:"荷甲",c:"🇳🇱",fl:"pec-zwolle"},
     {n:"阿伯丁",l:"蘇超",c:"🏴",fl:"aberdeen-fc"},{n:"哈茨",l:"蘇超",c:"🏴",fl:"heart-of-midlothian"},{n:"希伯尼安",l:"蘇超",c:"🏴",fl:"hibernian"},{n:"登地聯",l:"蘇超",c:"🏴",fl:"dundee-united"},
-    {n:"馬瑟韋爾",l:"蘇超",c:"🏴",fl:"motherwell"},{n:"基爾馬諾克",l:"蘇超",c:"🏴",fl:"kilmarnock-fc"},{n:"聖美倫",l:"蘇超",c:"🏴",fl:"st-mirren"},{n:"登地",l:"蘇超",c:"🏴",fl:"dundee"},{n:"福爾柯克",l:"蘇超",c:"🏴",fl:"falkirk"},
+    {n:"馬瑟韋爾",l:"蘇超",c:"🏴",fl:"motherwell"},{n:"基爾馬諾克",l:"蘇超",c:"🏴",fl:"kilmarnock-fc"},{n:"聖美倫",l:"蘇超",c:"🏴",fl:"st-mirren"},{n:"登地",l:"蘇超",c:"🏴",fl:"dundee"},{n:"福爾柯克",l:"蘇超",c:"🏴",fl:"falkirk"},{n:"聖莊士東",l:"蘇超",c:"🏴",fl:"st-johnstone"},
+    // ── 西甲補充 ──
+    {n:"塞爾塔",l:"西甲",c:"🇪🇸",fl:"celta-vigo"},{n:"阿拉維斯",l:"西甲",c:"🇪🇸",fl:"deportivo-alaves"},{n:"埃爾切",l:"西甲",c:"🇪🇸",fl:"elche-cf"},{n:"萊萬特",l:"西甲",c:"🇪🇸",fl:"levante-ud"},
+    {n:"奧薩蘇納",l:"西甲",c:"🇪🇸",fl:"osasuna"},{n:"巴列卡諾",l:"西甲",c:"🇪🇸",fl:"rayo-vallecano"},{n:"西班牙人",l:"西甲",c:"🇪🇸",fl:"rcd-espanyol-barcelona"},
+    // ── 德甲補充 ──
+    {n:"科隆",l:"德甲",c:"🇩🇪",fl:"1-fc-koln"},{n:"奧格斯堡",l:"德甲",c:"🇩🇪",fl:"fc-augsburg"},{n:"漢堡",l:"德甲",c:"🇩🇪",fl:"hamburger-sv"},{n:"美因茨",l:"德甲",c:"🇩🇪",fl:"mainz-05"},
+    {n:"弗萊堡",l:"德甲",c:"🇩🇪",fl:"sc-freiburg"},{n:"霍芬海姆",l:"德甲",c:"🇩🇪",fl:"tsg-hoffenheim"},{n:"柏林聯",l:"德甲",c:"🇩🇪",fl:"union-berlin"},
+    // ── 義甲補充 ──
+    {n:"烏迪內斯",l:"義甲",c:"🇮🇹",fl:"udinese"},{n:"熱那亞",l:"義甲",c:"🇮🇹",fl:"genoa"},{n:"卡利亞里",l:"義甲",c:"🇮🇹",fl:"cagliari"},{n:"科莫",l:"義甲",c:"🇮🇹",fl:"como-1907"},
+    {n:"萊切",l:"義甲",c:"🇮🇹",fl:"lecce"},{n:"帕爾馬",l:"義甲",c:"🇮🇹",fl:"parma"},
+    // ── 葡超補充 ──
+    {n:"卡薩皮亞",l:"葡超",c:"🇵🇹",fl:"casa-pia"},{n:"聖克拉拉",l:"葡超",c:"🇵🇹",fl:"cd-santa-clara"},{n:"阿馬多拉之星",l:"葡超",c:"🇵🇹",fl:"estrela-amadora"},{n:"阿爾維卡",l:"葡超",c:"🇵🇹",fl:"fc-alverca"},{n:"馬德拉國民",l:"葡超",c:"🇵🇹",fl:"cd-nacional-madeira"},
+    // ── 荷甲補充 ──
+    {n:"精英隊",l:"荷甲",c:"🇳🇱",fl:"excelsior"},{n:"錫塔德財神",l:"荷甲",c:"🇳🇱",fl:"fortuna-sittard"},{n:"泰爾斯達",l:"荷甲",c:"🇳🇱",fl:"telstar"},{n:"威廉二世",l:"荷甲",c:"🇳🇱",fl:"willem-ii"},
+    // ── K聯賽 / 法甲補充 ──
+    {n:"富川FC",l:"K聯賽",c:"🇰🇷",fl:"bucheon-1995"},{n:"仁川聯",l:"K聯賽",c:"🇰🇷",fl:"incheon-united"},{n:"巴黎FC",l:"法甲",c:"🇫🇷",fl:"paris-fc"},
   ],
   youth:[
     {n:"格拉斯哥流浪者",l:"蘇超",c:"🏴"},{n:"聖保羅",l:"巴甲",c:"🇧🇷"},{n:"河床",l:"阿甲",c:"🇦🇷"},
@@ -1449,7 +1464,7 @@ function hirePrivateCoach(){
   if(G.money<cost){ toast("錢不夠"); return; }
   const rows=attrRowsForPos();
   showEvent({emoji:"🧑‍🏫",title:"聘請私人教練",text:`花 ${moneyStr(cost)} 聘請頂級私人教練，指定強化一項能力。`,
-    choices:rows.slice(0,4).map(([k,label])=>({i:"🎯",t:`強化 ${label}（目前 ${G.attr[k]}）`,fn:()=>{ if(G.money<cost) return; G.money-=cost; const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+rand(2,4),20,99); G.overall=calcOverall(); logEvent("🧑‍🏫",`私人教練特訓：${label} +${G.attr[k]-b}。`,""); toast(`${label} +${G.attr[k]-b}`); }}))
+    choices:rows.slice(0,4).map(([k,label])=>({i:"🎯",t:`強化 ${label}（目前 ${G.attr[k]}）`,fn:()=>{ if(G.money<cost) return; G.money-=cost; const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+rand(4,7),20,99); G.overall=calcOverall(); logEvent("🧑‍🏫",`私人教練特訓：${label} +${G.attr[k]-b}。`,"log-gold"); toast(`${label} +${G.attr[k]-b}`); }}))
   });
 }
 function miniInline(name,val){
