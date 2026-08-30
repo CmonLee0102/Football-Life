@@ -275,7 +275,8 @@
   .cpath-dot{width:14px; height:14px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px rgba(245,196,81,.6), inset 0 0 0 3px #0b0b10; flex-shrink:0; position:relative; z-index:1;}
   .cpath-badge{width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:10px; flex-shrink:0;}
   /* 戰績卡 */
-  .statcard{position:relative; border:5px solid #888; border-radius:20px; padding:20px 18px; margin:4px 0 12px; overflow:hidden;}
+  .statcard{position:relative; border:5px solid #888; border-radius:20px; padding:18px 16px; margin:4px 0 12px; overflow:hidden;}
+  .statcard .radar{max-width:100%;}
   .statcard .sc-shine{position:absolute; inset:0; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.10) 47%,rgba(255,255,255,.02) 55%,transparent 70%); pointer-events:none; z-index:1;}
   .statcard .sc-in{position:relative; z-index:2;}
   .sc-rivet{position:absolute; width:8px; height:8px; border-radius:50%; z-index:3;
@@ -1541,17 +1542,19 @@ function statCardView(backAction){
           <div style="font-size:11px; color:#c7c7d2; margin:0 0 2px 4px;">📈 歷年評分趨勢（上＝高分）</div>
           ${hist.length>=2? ratingChart(hist) : `<div class="muted center" style="padding:16px; font-size:11px;">賽季不足，尚無趨勢圖</div>`}
         </div>
-        <div style="margin:14px 0 12px; background:${panel}; border:1px solid ${hexA(t.main,.28)}; border-radius:14px; padding:11px 13px 6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#c7c7d2; margin-bottom:2px;"><span>⚙️ 能力數值</span><span>OVR <b style="color:${t.main};">${G.overall}</b> · 潛力 ${G.potential}</span></div>
-          ${radarChart(keyAttrs, t.rainbow?'#ffd257':t.main)}
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-          ${stat("生涯出場",G.careerApps)}
-          ${stat("生涯進球",G.careerGoals,t.main)}
-          ${stat("生涯助攻",G.careerAssists)}
-          ${stat("最佳球員",(G.careerMOTM||0)+"次",t.main)}
-          ${stat("榮譽",G.trophies.length,t.main)}
-          ${stat("財富",moneyStr(G.money))}
+        <div style="display:flex; gap:10px; margin:14px 0 12px; align-items:stretch; flex-wrap:wrap;">
+          <div style="flex:1 1 150px; min-width:0; background:${panel}; border:1px solid ${hexA(t.main,.28)}; border-radius:14px; padding:8px 6px 4px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
+            <div style="font-size:10.5px; color:#c7c7d2; text-align:center; margin-bottom:2px;">⚙️ 能力值 · OVR <b style="color:${t.main};">${G.overall}</b></div>
+            ${radarChart(keyAttrs, t.rainbow?'#ffd257':t.main)}
+          </div>
+          <div style="flex:1 1 150px; min-width:0; display:grid; grid-template-columns:1fr 1fr; gap:6px; align-content:stretch;">
+            ${stat("出場",G.careerApps)}
+            ${stat("進球",G.careerGoals,t.main)}
+            ${stat("助攻",G.careerAssists)}
+            ${stat("最佳",(G.careerMOTM||0)+"次",t.main)}
+            ${stat("榮譽",G.trophies.length,t.main)}
+            ${stat("財富",moneyStr(G.money))}
+          </div>
         </div>
         <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; font-size:11px;">
           <span style="background:${hexA(t.main,.14)}; border:1px solid ${hexA(t.main,.4)}; color:#e8e8f0; border-radius:999px; padding:3px 10px;">名氣 ⭐${Math.round(G.fame)}</span>
@@ -1649,7 +1652,7 @@ function downloadStatsCard(){
     vals.forEach((v,i)=>{ ctx.beginPath(); ctx.arc(X(i),Y(v),2.4,0,7); ctx.fillStyle=v>=7.5?'#ffd257':t.main; ctx.fill(); });
   } else { ctx.textAlign='center'; ctx.fillStyle='#8b8b98'; font(11,600); ctx.fillText('賽季不足，尚無趨勢圖',W/2,chY+58); }
   // 能力雷達圖
-  const abY=chY+chH+14, abH=210, rcol=t.rainbow?'#ffd257':t.main;
+  const abY=chY+chH+14, abH=158, rcol=t.rainbow?'#ffd257':t.main;
   roundRectPath(ctx,PAD,abY,W-PAD*2,abH,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=hexA(t.main,.28); ctx.stroke();
   ctx.textAlign='left'; ctx.fillStyle='#c7c7d2'; font(11,700); ctx.fillText('⚙️ 能力數值',PAD+12,abY+18);
   ctx.textAlign='right'; ctx.fillStyle='#c7c7d2'; font(11,600); ctx.fillText(`OVR ${G.overall} · 潛力 ${G.potential}`,W-PAD-12,abY+18);
