@@ -133,6 +133,43 @@
   .bar{height:8px; background:#0b0b0f; border-radius:6px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.6);}
   .bar-fill{height:100%; border-radius:6px; transition:width .6s cubic-bezier(.3,1,.5,1);}
 
+  /* 手機模式預覽 */
+  #phoneToggle{position:fixed; right:14px; bottom:14px; z-index:9999; width:48px; height:48px; border-radius:50%;
+    background:linear-gradient(180deg,#20202a,#141419); border:1px solid var(--line); color:var(--gold); font-size:20px; cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; transition:transform .15s;}
+  #phoneToggle:active{transform:scale(.92);}
+  #phoneToggle.on{background:linear-gradient(180deg,#ffdd78,#e0a010); color:#1a1405; box-shadow:0 6px 22px rgba(245,196,81,.45);}
+  /* 手機模式：縮小顯示（一次看到更多），比例合理且完整置中、隨視窗高度自動縮放 */
+  body.phone-mode{overflow:auto; display:flex; align-items:center; justify-content:center; min-height:100dvh;}
+  body.phone-mode #app{ zoom:.9; flex:0 0 auto; width:400px!important; max-width:400px!important; height:min(790px, calc(90dvh / .9))!important; margin:0!important;
+    border:12px solid #0c0c10!important; border-radius:46px!important; box-shadow:0 0 0 2px #2c2c34, 0 34px 90px rgba(0,0,0,.85)!important;
+    overflow:hidden!important; transform:none!important; position:relative;}
+  body.phone-mode #root{margin:0!important; border-radius:0!important; max-width:none!important;}
+  @media (max-width:640px){ #phoneToggle{display:none;} body.phone-mode{display:block;} body.phone-mode #app{zoom:1!important; width:100%!important; border:none!important; border-radius:0!important; height:100dvh!important; margin:0!important; box-shadow:none!important;} }
+  /* 窄螢幕（真手機）：戰績卡更精簡 */
+  @media (max-width:640px){
+    .statcard{padding:15px 13px;}
+    .statcard .radar{max-width:186px;}
+    .statcard .sc-in > div{margin-top:9px!important;}
+  }
+  /* 投資介面 */
+  .inv-riskpill{display:inline-block; font-size:11px; font-weight:800; padding:3px 13px; border-radius:999px; letter-spacing:.5px;}
+  .inv-stat{flex:1; text-align:center; background:linear-gradient(180deg,#16161c,#101015); border:1px solid var(--line); border-radius:12px; padding:9px 4px;}
+  .inv-stat-v{font-weight:900; font-size:16px;}
+  .inv-stat-l{font-size:10px; color:var(--dim); margin-top:2px;}
+  .inv-range-bar{display:flex; height:9px; border-radius:5px; overflow:hidden; background:#0b0b0f; box-shadow:inset 0 1px 2px rgba(0,0,0,.6);}
+  .inv-range-loss{background:linear-gradient(90deg,#c73357,#f2557a); transition:width .15s;}
+  .inv-range-gain{background:linear-gradient(90deg,#2f9d55,#5ad07a); transition:width .15s;}
+  /* 滑桿 (投資金額進度條) */
+  input[type=range]{-webkit-appearance:none; appearance:none; height:8px; border-radius:5px; background:#33333c; outline:none; cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:linear-gradient(180deg,#ffdd78,#e0a010); box-shadow:0 2px 8px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.5); cursor:pointer; margin-top:-1px;}
+  input[type=range]::-moz-range-thumb{width:22px; height:22px; border:none; border-radius:50%; background:linear-gradient(180deg,#ffdd78,#e0a010); box-shadow:0 2px 8px rgba(0,0,0,.5); cursor:pointer;}
+  /* 環形進度儀表 */
+  .ring{width:60px; height:60px; margin:0 auto; border-radius:50%; position:relative;
+    background:conic-gradient(var(--c) calc(var(--p)*1%), rgba(255,255,255,.07) 0);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px -2px var(--c);}
+  .ring::after{content:""; position:absolute; inset:5px; border-radius:50%; background:linear-gradient(180deg,#16161c,#0e0e13);}
+  .ring-in{position:relative; z-index:1; font-weight:900; font-size:17px;}
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
   .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
   .sc-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
@@ -156,8 +193,10 @@
   nav button{flex:1; background:none; border:none; color:var(--dim); font-size:14px; font-weight:700; letter-spacing:.5px;
     padding:9px 4px; border-radius:9px; cursor:pointer; transition:color .15s, background .15s, text-shadow .15s; position:relative;}
   nav button:hover{color:#fff; background:rgba(245,196,81,.22); text-shadow:0 0 16px rgba(245,196,81,.95), 0 0 6px rgba(255,255,255,.6); box-shadow:inset 0 0 0 1px rgba(245,196,81,.5); transform:translateY(-1px);}
-  nav button.active{color:var(--gold); text-shadow:0 0 12px rgba(245,196,81,.5);}
-  nav button.active::after{content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:-6px; width:24px; height:2px; border-radius:2px; background:var(--gold); box-shadow:0 0 10px var(--gold);}
+  nav button.active{color:var(--ink); font-weight:900; background:linear-gradient(180deg,#ffdd78,#e0a010); box-shadow:0 3px 12px rgba(245,196,81,.35), inset 0 1px 1px rgba(255,255,255,.4); text-shadow:none;}
+  nav button.active:hover{color:var(--ink); background:linear-gradient(180deg,#ffe38c,#e6a616); text-shadow:none;}
+  nav button.active::after{content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:-6px; width:60%; height:3px; border-radius:3px; background:var(--gold); box-shadow:0 0 10px var(--gold); animation:navUnder .3s cubic-bezier(.3,1.3,.5,1);}
+  @keyframes navUnder{from{width:0; opacity:0;}to{opacity:1;}}
 
   /* Event modal */
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,.78); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
@@ -198,6 +237,34 @@
   .spon-tag{font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px; white-space:nowrap;}
   .spon-tag.done{color:#7fe0a0; background:rgba(120,220,140,.14);}
   .spon-tag.lock{color:var(--dim); background:rgba(255,255,255,.06);}
+  /* 賽季總結 */
+  .ss-head{text-align:center; padding:6px 0 2px;}
+  .ss-badge{width:66px; height:66px; margin:0 auto 6px; border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:34px;
+    background:linear-gradient(135deg,#ffdd78,#d99b1f); box-shadow:0 8px 24px rgba(245,196,81,.35), inset 0 1px 1px rgba(255,255,255,.5);}
+  .ss-season{font-size:11px; letter-spacing:4px; color:var(--gold); font-weight:900;}
+  .ss-title{font-size:22px; font-weight:900; letter-spacing:3px; margin-top:2px;}
+  .ss-stats{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.012));}
+  /* 開關 Toggle */
+  .switch{width:50px; height:28px; border-radius:999px; background:#2c2c34; border:1px solid var(--line); position:relative; cursor:pointer; transition:background .22s; flex-shrink:0;}
+  .switch.on{background:linear-gradient(90deg,#5ad07a,#2f9d55); border-color:transparent;}
+  .switch-dot{position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.5); transition:transform .22s cubic-bezier(.3,1.4,.5,1);}
+  .switch.on .switch-dot{transform:translateX(22px);}
+  /* 生涯結算 */
+  .rt-hero{margin:24px 0 8px; position:relative;}
+  .rt-badge{width:100px; height:100px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:54px;
+    background:radial-gradient(circle at 50% 34%, rgba(245,196,81,.3), rgba(245,196,81,.04) 72%);
+    box-shadow:0 0 0 2px rgba(245,196,81,.45), 0 0 44px rgba(245,196,81,.32), inset 0 0 32px rgba(245,196,81,.16);
+    animation:rtGlow 2.6s ease-in-out infinite;}
+  @keyframes rtGlow{0%,100%{box-shadow:0 0 0 2px rgba(245,196,81,.4),0 0 34px rgba(245,196,81,.26),inset 0 0 28px rgba(245,196,81,.14);}50%{box-shadow:0 0 0 2px rgba(245,196,81,.55),0 0 52px rgba(245,196,81,.4),inset 0 0 34px rgba(245,196,81,.2);}}
+  .rt-h1{font-size:22px; margin:6px 0 4px; letter-spacing:4px; font-weight:800;}
+  .rt-title{font-size:20px; font-weight:900; letter-spacing:1.5px;
+    background:linear-gradient(180deg,#ffe9a8,#f5c451 55%,#d99b1f); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--gold);
+    filter:drop-shadow(0 2px 12px rgba(245,196,81,.4));}
+  .rt-titles-card{background:linear-gradient(160deg,rgba(245,196,81,.07),rgba(255,255,255,.015)); border-color:rgba(245,196,81,.3)!important;}
+  .rt-chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
+  .rt-chip{display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; padding:6px 12px; border-radius:999px;
+    background:linear-gradient(180deg,rgba(245,196,81,.18),rgba(245,196,81,.05)); border:1px solid rgba(245,196,81,.42); color:var(--txt);
+    box-shadow:0 2px 8px rgba(0,0,0,.3);}
   /* 能力雷達圖：載入時由中心擴張 */
   .radar-shape{ animation:radarGrow .75s cubic-bezier(.22,1,.36,1); }
   @keyframes radarGrow{ from{ transform:scale(0); opacity:.2; } to{ transform:scale(1); opacity:1; } }
@@ -208,7 +275,7 @@
   .cpath-dot{width:14px; height:14px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px rgba(245,196,81,.6), inset 0 0 0 3px #0b0b10; flex-shrink:0; position:relative; z-index:1;}
   .cpath-badge{width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:10px; flex-shrink:0;}
   /* 戰績卡 */
-  .statcard{position:relative; border:3px solid #888; border-radius:20px; padding:20px 18px; margin:4px 0 12px; overflow:hidden;}
+  .statcard{position:relative; border:5px solid #888; border-radius:20px; padding:20px 18px; margin:4px 0 12px; overflow:hidden;}
   .statcard .sc-shine{position:absolute; inset:0; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.10) 47%,rgba(255,255,255,.02) 55%,transparent 70%); pointer-events:none; z-index:1;}
   .statcard .sc-in{position:relative; z-index:2;}
   .sc-rivet{position:absolute; width:8px; height:8px; border-radius:50%; z-index:3;
@@ -310,16 +377,18 @@
   .ach-grid{display:flex; flex-direction:column; gap:8px;}
   .ach-grid-2{display:grid; grid-template-columns:1fr; gap:8px;}
   @media (min-width:560px){ .ach-grid-2{grid-template-columns:1fr 1fr;} }
-  .ach{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:12px; border:1px solid var(--line);
-    background:var(--panel2); opacity:.55; transition:opacity .2s;}
-  .ach.got{opacity:1; border-color:rgba(245,196,81,.4); background:linear-gradient(180deg,#211d10,#15110a);}
-  .ach-ic{font-size:22px; width:30px; text-align:center; flex-shrink:0; filter:grayscale(1) opacity(.7);}
-  .ach.got .ach-ic{filter:none;}
+  .ach{display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:13px; border:1px solid rgba(255,255,255,.06);
+    background:var(--panel2); opacity:.5; transition:opacity .2s, transform .12s, box-shadow .2s; position:relative; overflow:hidden;}
+  .ach.got{opacity:1; border-color:rgba(245,196,81,.5); background:linear-gradient(150deg,#2a2412,#16110a); box-shadow:0 3px 14px rgba(245,196,81,.14), inset 0 1px 0 rgba(255,255,255,.05);}
+  .ach.got::before{content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 40%,rgba(255,220,120,.12) 50%,transparent 60%); pointer-events:none;}
+  .ach:not(.got) .ach-ic{filter:grayscale(1) opacity(.55);}
+  .ach-ic{font-size:24px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0; border-radius:10px; background:rgba(0,0,0,.25);}
+  .ach.got .ach-ic{background:radial-gradient(circle at 50% 40%,rgba(245,196,81,.28),rgba(245,196,81,.05)); box-shadow:0 0 12px rgba(245,196,81,.3);}
   .ach-tx{min-width:0;}
   .ach-nm{font-weight:800; font-size:13px;}
   .ach.got .ach-nm{color:var(--gold);}
-  .ach-ds{font-size:11px; color:var(--dim); margin-top:1px;}
-  .ach-ck{margin-left:auto; color:var(--gold); font-weight:900; font-size:16px; flex-shrink:0;}
+  .ach-ds{font-size:11px; color:var(--dim); margin-top:2px;}
+  .ach-ck{margin-left:auto; color:#1a1405; font-weight:900; font-size:12px; flex-shrink:0; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:linear-gradient(180deg,#ffdd78,#e0a010); box-shadow:0 2px 8px rgba(245,196,81,.4);}
   /* 選位置：足球場 11 選 1 */
   .pitch-pick{position:relative; width:100%; max-width:360px; margin:10px auto 0; aspect-ratio:3/4;
     background:linear-gradient(180deg,#12472a,#0c331d); border:2px solid #2f6b45; border-radius:16px; overflow:hidden;
@@ -351,9 +420,9 @@
   .live-team{flex:1; text-align:center; min-width:0;}
   .live-crest{min-height:36px; display:flex; align-items:center; justify-content:center;}
   .live-tname{font-size:12px; font-weight:700; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .live-scorebox{flex:0 0 auto; text-align:center; padding:0 8px;}
-  .live-score{font-size:38px; font-weight:900; letter-spacing:1px; display:inline-block; text-shadow:0 2px 18px rgba(245,196,81,.2);}
-  .live-clock{font-size:13px; color:var(--gold); font-weight:800; margin-top:2px;}
+  .live-scorebox{flex:0 0 auto; text-align:center; padding:5px 15px; margin:0 4px; background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.25)); border:1px solid rgba(245,196,81,.28); border-radius:14px; box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 4px 16px rgba(0,0,0,.4);}
+  .live-score{font-size:40px; font-weight:900; letter-spacing:2px; display:inline-block; text-shadow:0 2px 24px rgba(245,196,81,.4);}
+  .live-clock{font-size:12px; color:var(--gold); font-weight:800; margin-top:1px; letter-spacing:1px;}
   .live-you{text-align:center; font-size:11px; color:var(--dim); margin-top:9px;}
   .live-speed{position:absolute; top:12px; right:12px; z-index:50; background:rgba(20,20,26,.85); border:1px solid var(--line); color:var(--gold); font-weight:800; font-size:12px; padding:6px 11px; border-radius:10px; cursor:pointer; backdrop-filter:blur(4px);}
   .live-speed:active{transform:scale(.95);}
@@ -362,11 +431,11 @@
 
   .live-feed{flex:1; min-height:0; overflow-y:auto; padding:10px 14px 8px; display:flex; flex-direction:column;}
   .live-feed::-webkit-scrollbar{width:0;}
-  .feed-item{display:flex; gap:9px; align-items:flex-start; padding:9px 11px; margin-bottom:7px; border-radius:12px;
-    background:linear-gradient(180deg,#16161c,#111116); border:1px solid var(--line); font-size:13px; line-height:1.45; animation:feedIn .35s;}
-  .feed-item.goal{border-color:rgba(245,196,81,.55); background:linear-gradient(180deg,#26200f,#191509);}
-  .feed-item.oppgoal{border-color:rgba(242,85,122,.5); background:linear-gradient(180deg,#2a1418,#1c1013);}
-  .feed-item .fi-ic{font-size:17px; flex-shrink:0; line-height:1.4;}
+  .feed-item{display:flex; gap:9px; align-items:flex-start; padding:9px 11px 9px 12px; margin-bottom:7px; border-radius:12px;
+    background:linear-gradient(180deg,#16161c,#111116); border:1px solid var(--line); border-left:3px solid rgba(255,255,255,.14); font-size:13px; line-height:1.45; animation:feedIn .35s;}
+  .feed-item.goal{border-color:rgba(245,196,81,.55); border-left-color:var(--gold); background:linear-gradient(180deg,#2a2410,#191509); box-shadow:0 0 16px rgba(245,196,81,.14);}
+  .feed-item.oppgoal{border-color:rgba(242,85,122,.5); border-left-color:var(--red); background:linear-gradient(180deg,#2a1418,#1c1013);}
+  .feed-item .fi-ic{font-size:18px; flex-shrink:0; line-height:1.4;}
   @keyframes feedIn{from{opacity:0; transform:translateY(-8px) scale(.97);}to{opacity:1; transform:none;}}
 
   /* 比賽中決策：置中覆蓋於比賽畫面正中央 */
@@ -561,10 +630,10 @@ function natFlag(nation,size){
 
 /* ---------- Data ---------- */
 const POSITIONS = {
-  GK:{name:"守門員", emoji:"🧤", keys:["reflex","handling","positioning"]},
-  DF:{name:"後衛", emoji:"🛡️", keys:["tackle","strength","positioning"]},
-  MF:{name:"中場", emoji:"🎯", keys:["passing","vision","stamina"]},
-  FW:{name:"前鋒", emoji:"⚽", keys:["shooting","pace","dribble"]},
+  GK:{name:"守門員", emoji:"🧤", keys:["diving","reflexes","handling"]},
+  DF:{name:"後衛", emoji:"🛡️", keys:["defending","physical","pace"]},
+  MF:{name:"中場", emoji:"🎯", keys:["passing","dribbling","pace"]},
+  FW:{name:"前鋒", emoji:"⚽", keys:["shooting","pace","dribbling"]},
 };
 // 4-3-3 陣型：11 個位置，x/y 為球場百分比座標（y 大=自家球門在下）
 const FORMATION = [
@@ -741,6 +810,8 @@ function newGame(){
     // relationships / life
     relationship:null, // {name, love, type}
     married:false, kids:0,
+    // 人際關係（0-100）
+    coachRel:60, chem:60, fanRel:50,
     // reputation & extras
     sponsors:[], socialFollowers:1, // 萬 (10k)
     injury:null, // {name, weeks}
@@ -757,29 +828,21 @@ function newGame(){
 
 /* ---------- Stat helpers ---------- */
 function baseAttrs(pos){
-  // 0-99 scale, young player
+  // 0-99 scale, young player — FIFA 式六維
   const g = ()=>rand(40,58);
-  return {
-    // physical
-    pace:g(), stamina:g(), strength:g(),
-    // technical
-    shooting:g(), passing:g(), dribble:g(), tackle:g(),
-    // mental
-    vision:g(), positioning:g(), composure:g(),
-    // GK
-    reflex:g(), handling:g(),
-  };
+  if(pos==="GK") return {diving:g(), handling:g(), kicking:g(), positioning:g(), reflexes:g(), speed:g()};
+  return {pace:g(), shooting:g(), passing:g(), dribbling:g(), defending:g(), physical:g()};
 }
 
 function calcOverall(){
   const a=G.attr, p=G.pos;
   let keys;
-  if(p==="GK") keys=[["reflex",3],["handling",3],["positioning",2],["composure",1],["strength",1]];
-  else if(p==="DF") keys=[["tackle",3],["strength",2],["positioning",2],["pace",1],["passing",1],["composure",1]];
-  else if(p==="MF") keys=[["passing",3],["vision",3],["stamina",2],["dribble",1],["composure",1]];
-  else keys=[["shooting",3],["pace",2],["dribble",2],["composure",1],["positioning",1],["stamina",1]];
+  if(p==="GK") keys=[["diving",3],["reflexes",3],["handling",2],["positioning",2],["kicking",1],["speed",1]];
+  else if(p==="DF") keys=[["defending",3],["physical",2],["pace",2],["passing",1],["dribbling",1],["shooting",1]];
+  else if(p==="MF") keys=[["passing",3],["dribbling",2],["pace",1],["shooting",1],["defending",1],["physical",1]];
+  else keys=[["shooting",3],["pace",2],["dribbling",2],["passing",1],["physical",1],["defending",1]];
   let sum=0,w=0;
-  keys.forEach(([k,wt])=>{sum+=a[k]*wt; w+=wt;});
+  keys.forEach(([k,wt])=>{sum+=(a[k]||0)*wt; w+=wt;});
   const ov=Math.round(sum/w);
   if(G) G.peakOverall=Math.max(G.peakOverall||0, ov); // 追蹤生涯巔峰能力
   return ov;
@@ -805,6 +868,60 @@ function logEvent(ico,text,cls){
   if(G.log.length>60) G.log.pop();
 }
 
+/* ---------- 宿敵 / 德比 ---------- */
+const RIVALS=[
+  ["曼城","曼聯"],["利物浦","埃弗頓"],["阿森納","熱刺"],["切爾西","熱刺"],
+  ["皇家馬德里","巴塞隆納"],["皇家馬德里","馬德里競技"],["塞維利亞","皇家貝提斯"],
+  ["AC米蘭","國際米蘭"],["尤文圖斯","國際米蘭"],["羅馬","拉齊歐"],
+  ["拜仁慕尼黑","多特蒙德"],["巴黎聖日耳曼","馬賽"],
+  ["里斯本競技","班菲卡"],["波爾圖","班菲卡"],
+  ["些路迪","格拉斯哥流浪者"],["博卡青年","河床"],["阿賈克斯","費耶諾德"],
+];
+function isDerby(oppName){ if(!G.club||!oppName) return false; const me=G.club.n; return RIVALS.some(g=>g.indexOf(me)>=0 && g.indexOf(oppName)>=0); }
+
+/* ---------- 音效（WebAudio 合成，預設關閉） ---------- */
+let _actx=null;
+function soundOn(){ return localStorage.getItem('fl_sound')==='1'; }
+function _ac(){ try{ _actx=_actx||new (window.AudioContext||window.webkitAudioContext)(); if(_actx.state==='suspended') _actx.resume(); return _actx; }catch(e){ return null; } }
+function beep(freq,dur,type,vol,delay){ if(!soundOn())return; const ac=_ac(); if(!ac)return; const t=ac.currentTime+(delay||0); const o=ac.createOscillator(), g=ac.createGain(); o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(ac.destination); g.gain.setValueAtTime(vol||0.06,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.15)); o.start(t); o.stop(t+(dur||0.16)); }
+function sndGoal(){ beep(523,0.12,'triangle',0.09,0); beep(659,0.12,'triangle',0.09,0.12); beep(784,0.26,'triangle',0.1,0.24); }
+function sndWhistle(){ beep(1900,0.16,'square',0.05,0); beep(1900,0.12,'square',0.05,0.22); }
+function sndClick(){ beep(300,0.05,'sine',0.03,0); }
+
+/* ---------- 設定選單 ---------- */
+function openSettings(){
+  const on=soundOn();
+  showModalCustom(`
+    <div class="emoji">⚙️</div>
+    <h3>設定</h3>
+    <div class="card" style="text-align:left; margin-top:6px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-weight:700;">🔊 音效</span>
+        <div class="switch set-sound-toggle ${on?'on':''}" onclick="toggleSound()"><div class="switch-dot"></div></div>
+      </div>
+      <div class="muted" style="font-size:11px; margin-top:8px;">開啟後：進球有歡呼旋律、開球／終場有哨聲（瀏覽器合成音，無需檔案）。</div>
+    </div>
+    <button class="btn sec" onclick="exportSave()">📤 匯出存檔（下載）</button>
+    <button class="btn sec" onclick="importSavePrompt()">📥 匯入存檔</button>
+    <button class="btn red" onclick="closeModalThen(confirmRestart)">🔄 重新開始生涯</button>
+    <button class="btn" onclick="closeModal()">關閉</button>
+  `);
+}
+function toggleSound(){
+  const nowOn = !soundOn();
+  localStorage.setItem('fl_sound', nowOn?'1':'0');
+  const t=document.querySelector('.set-sound-toggle'); if(t) t.classList.toggle('on', nowOn);
+  if(nowOn){ _ac(); sndGoal(); }   // 開啟時播放預覽音
+}
+function exportSave(){ try{ if(!G){toast('無存檔');return;} const blob=new Blob([JSON.stringify(G)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='football-life-'+(G.name||'save')+'.json'; document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(url);a.remove();},100); toast('存檔已下載'); }catch(e){ toast('匯出失敗'); } }
+function importSavePrompt(){ showModalCustom(`
+  <div class="emoji">📥</div><h3>匯入存檔</h3>
+  <p style="color:var(--dim); font-size:13px; text-align:center;">貼上先前匯出的存檔內容（JSON），將覆蓋目前進度。</p>
+  <textarea id="impBox" style="width:100%; height:120px; background:#0c0c11; color:#ddd; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:11px; box-sizing:border-box;"></textarea>
+  <button class="btn" onclick="doImport()">確認匯入</button>
+  <button class="btn sec" onclick="closeModal()">取消</button>`); }
+function doImport(){ try{ const v=($("#impBox").value||'').trim(); const obj=JSON.parse(v); if(!obj||typeof obj!=='object'||!('attr' in obj)){ toast('存檔格式錯誤'); return; } G=obj; localStorage.setItem('footballLife',JSON.stringify(G)); closeModal(); toast('匯入成功！'); render(); }catch(e){ toast('存檔格式錯誤'); } }
+
 /* ---------- Toast ---------- */
 let toastTimer=null;
 function toast(msg){
@@ -817,19 +934,19 @@ function toast(msg){
    ============================================================ */
 const BGS=[
   {k:"academy",e:"🏫",n:"豪門青訓",d:"出身頂級俱樂部青訓營，天賦滿滿但競爭激烈。",pot:[80,92],st:5,fame:8,
-    bonus:{positioning:5,passing:4,composure:4,stamina:3}, spec:"站位、傳球、冷靜",
-    good:["起始能力與潛力最高之一","起始名氣不錯、資金較充裕（€80k）","戰術素養佳（站位/傳球/冷靜高）"],
+    bonus:{passing:5,defending:4,physical:3}, spec:"傳球、防守、體格",
+    good:["起始能力與潛力最高之一","起始名氣不錯、資金較充裕（€80k）","戰術素養佳（傳球/防守高）"],
     bad:["競爭激烈，先發位置難搶","外界期望高、壓力大"]},
   {k:"street",e:"🛣️",n:"街頭足球",d:"從街頭踢出來，技術華麗、韌性十足，但基礎粗糙。",pot:[72,88],st:3,fame:3,
-    bonus:{dribble:11,pace:7,shooting:4}, spec:"盤帶、速度、射門",
+    bonus:{dribbling:11,pace:7,shooting:4}, spec:"盤帶、速度、射門",
     good:["初始盤帶、速度特別高","無包袱、心理素質強","草根逆襲故事性強"],
     bad:["戰術素養較粗糙","潛力與名氣偏低、資源最少"]},
   {k:"academic",e:"📚",n:"校隊出身",d:"半路出家的讀書人，起步較低但頭腦聰明、潛力穩定。",pot:[70,84],st:4,fame:2,
-    bonus:{vision:9,composure:6,positioning:4,passing:4}, spec:"視野、冷靜、站位",
-    good:["球商高（視野/冷靜/站位高）","成長踏實穩定、沒有包袱"],
+    bonus:{passing:9,defending:5,dribbling:4}, spec:"傳球、防守、盤帶",
+    good:["球商高（傳球/防守高）","成長踏實穩定、沒有包袱"],
     bad:["身體與速度平平","潛力天花板較低，難成頂級巨星"]},
   {k:"legacy",e:"👑",n:"球星之子",d:"父親是傳奇球星，天生光環與人脈，但壓力如山。",pot:[78,90],st:7,fame:20,
-    bonus:{composure:6,shooting:5,passing:4,vision:3}, spec:"冷靜、射門、傳球",
+    bonus:{shooting:6,passing:5,dribbling:3}, spec:"射門、傳球、盤帶",
     good:["起始能力最高、名氣光環大","資金雄厚（€400k）、粉絲多（50萬）","人脈廣，較易收到高級距報價"],
     bad:["活在父親陰影下，壓力如山","外界期望值極高，稍差就被放大檢視"]},
 ];
@@ -862,7 +979,7 @@ function renderSetup(){
         <div class="home-sub">FOOTBALL&nbsp;LIFE · 打造你的綠茵傳奇</div>
       </div>
       <div class="home-divider"></div>
-      <div class="card" style="margin-top:16px;">
+      <div class="card" style="margin-top:14px;">
         <div style="display:flex; gap:16px; flex-wrap:wrap;">
           <div style="flex:1; min-width:190px;">
             <h2 style="margin-top:0;">📝 你的名字</h2>
@@ -1131,10 +1248,13 @@ function signClub(club,tier,silent){
     if(last && last.end==null) last.end=G.season||1;
     G.clubHistory.push({n:club.n, club, l:club.l, tier, start:G.season||1, end:null});
   }
+  const changed = G.club && G.club.n!==club.n;
   G.club=club; G.tier=tier; G.league=club.l;
   const [lo,hi]=TIER_WAGE[tier];
   G.wage=rand(lo,hi);
   G.contractYears=rand(2,4);
+  // 新環境：教練信任、更衣室、球迷都要重新建立（名氣高則球迷起點稍高）
+  if(changed){ G.coachRel=55; G.chem=50; G.fanRel=clamp(40+Math.round((G.fame||0)/6),0,70); }
   if(!silent) logEvent("✍️",`簽約加盟 ${club.n}（${club.l}），週薪 ${moneyStr(G.wage)}。`,"log-gold");
 }
 
@@ -1183,8 +1303,8 @@ function renderHeader(){
 
 function renderNav(){
   const items=[
-    ["home","🏠","主頁"],["league","🏆","聯賽"],["career","📊","數據"],["achieve","🏅","成就"],["train","🏋️","訓練"],
-    ["life","💬","生活"],["market","🛒","商業"],
+    ["home","🏠","主頁"],["league","🏆","聯賽"],["train","🏋️","訓練"],["career","📊","數據"],
+    ["life","💬","生活"],["market","🛒","商業"],["achieve","🏅","成就"],
   ];
   return `<nav>${items.map(([k,i,n])=>
     `<button class="${G.screen===k?'active':''}" onclick="nav('${k}')">${n}</button>`
@@ -1215,14 +1335,14 @@ function screenLeague(){
   const posEmoji=m=>POSITIONS[({GK:'GK',CB:'DF',LB:'DF',RB:'DF',CDM:'MF',CM:'MF',CAM:'MF',LW:'FW',ST:'FW',RW:'FW'})[m.ab]||'MF'].emoji;
   const me=G.lg.teams.find(t=>t.me);
   return `
-    ${nextOpp?`<div class="card" style="background:linear-gradient(135deg,#1c1a12,#101015); border-color:rgba(245,196,81,.22);">
-      <div class="muted" style="font-size:11px;">第 ${G.week+1} / 38 輪 · 下一個對手</div>
+    ${nextOpp?(()=>{ const derby=isDerby(nextOpp.n); return `<div class="card" style="background:${derby?'linear-gradient(135deg,#2a1210,#140a0a)':'linear-gradient(135deg,#1c1a12,#101015)'}; border-color:${derby?'rgba(242,85,122,.5)':'rgba(245,196,81,.22)'};">
+      <div class="muted" style="font-size:11px;">第 ${G.week+1} / 38 輪 · 下一個對手 ${derby?'<span style="color:var(--red); font-weight:800;">· 🔥 德比大戰</span>':''}</div>
       <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
         ${clubBadge(nextOpp.club,34)}
-        <div style="flex:1;"><div style="font-weight:800; font-size:16px;">${nextOpp.n}</div><div class="muted">實力評估 ${nextOpp.str}</div></div>
-        <div style="font-size:24px;">⚔️</div>
+        <div style="flex:1;"><div style="font-weight:800; font-size:16px;">${nextOpp.n}</div><div class="muted">${derby?'<span style="color:var(--red);">宿敵對決 · 榮譽之戰</span>':'實力評估 '+nextOpp.str}</div></div>
+        <div style="font-size:24px;">${derby?'🔥':'⚔️'}</div>
       </div>
-    </div>`:''}
+    </div>`;})():''}
     <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
       <div style="flex:1.5; min-width:300px;">
         <h2 style="margin-top:6px;">${leagueLogo(G.league,22)} ${G.league} 積分榜</h2>
@@ -1243,14 +1363,7 @@ function screenLeague(){
         </div>
       </div>
       <div style="flex:1; min-width:260px;">
-        <h2 style="margin-top:6px;">👥 球隊陣容</h2>
-        <div class="card">
-          <div class="kv"><span class="k">你的位置</span><span class="v" style="color:var(--gold);">${G.role||POSITIONS[G.pos].name}${G.subRole?` (${G.subRole})`:''} · OVR ${G.overall}</span></div>
-          <div class="kv"><span class="k">背號 / 慣用腳</span><span class="v">#${G.number||10} · ${G.foot||'右'}腳</span></div>
-          <div class="kv"><span class="k">更衣室化學效應</span><span class="v" style="color:${(G.chem||60)>=66?'var(--accent)':(G.chem||60)>=40?'var(--gold)':'var(--red)'}">${Math.round(G.chem||60)}</span></div>
-          ${(G.squad||[]).map(m=>`<div class="kv"><span class="k">${posEmoji(m)} ${m.name} <span class="muted">${m.ab}</span></span><span class="v">OVR ${m.rating}</span></div>`).join("")}
-        </div>
-        <h2>📅 本季戰績</h2>
+        <h2 style="margin-top:6px;">📅 本季戰績</h2>
         <div class="card">
           <div class="kv"><span class="k">戰績 (勝/平/負)</span><span class="v">${me.W} / ${me.D} / ${me.L}</span></div>
           <div class="kv"><span class="k">進球 / 失球</span><span class="v">${me.GF} / ${me.GA}</span></div>
@@ -1315,10 +1428,10 @@ function careerLegend(){
 }
 function playerTraits(){
   const a=G.attr, tr=[], add=(c,t)=>{ if(c) tr.push(t); };
-  add(a.shooting>=80,'神射手'); add(a.pace>=82,'極速飛翼'); add(a.dribble>=82,'盤帶大師');
-  add(a.passing>=80,'組織核心'); add(a.vision>=82,'手術刀直傳'); add(a.strength>=80,'鋼鐵之軀');
-  add(a.stamina>=82,'永動機'); add(a.composure>=82,'大心臟'); add((a.tackle||0)>=80,'搶斷專家');
-  add((a.reflex||0)>=82,'神反應'); add((a.handling||0)>=80,'穩健門將'); add((a.positioning||0)>=80,'位置感大師');
+  add((a.shooting||0)>=80,'神射手'); add((a.pace||0)>=82,'極速飛翼'); add((a.dribbling||0)>=82,'盤帶大師');
+  add((a.passing||0)>=80,'組織核心'); add((a.defending||0)>=80,'防守鐵閘'); add((a.physical||0)>=80,'鋼鐵之軀');
+  add((a.diving||0)>=82,'飛天門將'); add((a.reflexes||0)>=82,'神反應'); add((a.handling||0)>=80,'穩健手套');
+  add((a.kicking||0)>=80,'開球大砲'); add((a.positioning||0)>=80,'位置感大師');
   add(G.trophies.length>=10,'冠軍收藏家'); add(G.careerGoals>=200,'進球機器'); add((G.socialFollowers||0)>=100,'社群巨星');
   add(G.bg&&G.bg.k==='street','草根逆襲'); add(G.bg&&G.bg.k==='legacy','天之驕子'); add(G.caps>=50,'國家棟樑');
   if(!tr.length){ tr.push('全能型','努力不懈','團隊至上'); }
@@ -1328,6 +1441,34 @@ function careerTeams(){
   const path=(G.clubHistory&&G.clubHistory.length)?G.clubHistory.map(c=>c.n):(G.club?[G.club.n]:[]);
   const uniq=[...new Set(path)];
   return uniq.length? uniq.join('、') : '—';
+}
+// 生涯結算稱號（依位置、榮譽、生涯數據頒發多個稱號）
+function retireTitles(){
+  const T=[], a=G.attr||{}, tro=G.trophies||[];
+  const has=function(kw){ return tro.some(function(t){return t.name.includes(kw);}); };
+  const add=function(c,ic,n){ if(c) T.push({ic:ic,n:n}); };
+  if(G.pos==='FW'){ add((a.shooting||0)>=85,'⚽','神射手'); add((a.pace||0)>=88,'💨','閃電前鋒'); add((a.dribbling||0)>=88,'🪄','盤帶魔術師'); }
+  if(G.pos==='MF'){ add((a.passing||0)>=85,'🎼','中場指揮官'); add((a.dribbling||0)>=86,'🔭','中場大師'); add(G.careerAssists>=150,'🅰️','助攻大師'); }
+  if(G.pos==='DF'){ add((a.defending||0)>=83,'🛡️','鋼鐵後防'); add((a.physical||0)>=85,'🧱','銅牆鐵壁'); }
+  if(G.pos==='GK'){ add((a.reflexes||0)>=85,'🧤','黃金門神'); add((a.diving||0)>=85,'🕊️','飛天門將'); add(has('金手套'),'🧱','零封專家'); }
+  add(has('世俱盃'),'🌐','世界之王');
+  add(has('歐洲冠軍聯賽')||has('解放者盃')||has('亞冠聯賽'),'🌟','洲際霸主');
+  add(has('聯賽冠軍'),'🏆','聯賽之王');
+  add(has('金靴'),'👟','金靴殺手');
+  add(tro.length>=15,'💎','榮譽收藏家'); add(tro.length>=8&&tro.length<15,'🥇','常勝將軍');
+  add(G.careerGoals>=300,'👑','進球之王'); add(G.careerGoals>=150&&G.careerGoals<300,'🎯','進球機器');
+  add(G.careerApps>=450,'🎖️','沙場老將');
+  add(G.age>=38,'🌳','不老常青樹');
+  add(G.caps>=60,'🚩','國家棟樑'); add(G.intlGoals>=25,'🌍','國家英雄');
+  add((G.socialFollowers||0)>=120,'📱','社群天王');
+  add(G.money>=4000,'💰','吸金球星');
+  add((G.careerMOTM||0)>=40,'⭐','全場最佳專業戶');
+  var nClubs=(G.clubHistory||[]).length;
+  add(nClubs<=2 && G.careerApps>=150,'❤️','一生忠誠'); add(nClubs>=5,'✈️','浪跡天涯');
+  add(G.bg&&G.bg.k==='street','🛣️','草根逆襲'); add(G.bg&&G.bg.k==='legacy','👑','天之驕子');
+  add(G.married && (G.kids||0)>=2,'👨‍👩‍👧','幸福家庭');
+  if(!T.length) T.push({ic:'⚽',n:'熱愛足球的人'});
+  return T;
 }
 function careerTeamClubs(){
   const src=(G.clubHistory&&G.clubHistory.length)?G.clubHistory:(G.club?[{n:G.club.n,club:G.club}]:[]);
@@ -1357,9 +1498,9 @@ function statCardView(backAction){
         radial-gradient(130% 85% at 50% -8%, ${hexA(t.main,.16)}, transparent 58%),
         linear-gradient(150deg,#121016,#09090e);`
     : `background:
-        radial-gradient(135% 90% at 50% -10%, ${hexA(t.main,.16)}, transparent 55%),
-        radial-gradient(80% 60% at 50% 112%, ${hexA(p[0],.08)}, transparent 60%),
-        linear-gradient(160deg,#141019,#0a0a10);`;
+        linear-gradient(150deg, ${hexA(p[2]||p[1],.22)}, ${hexA(t.main,.10)} 42%, #0c0c12 82%),
+        radial-gradient(120% 80% at 50% -12%, ${hexA(t.main,.24)}, transparent 56%),
+        radial-gradient(90% 60% at 50% 114%, ${hexA(p[0],.10)}, transparent 60%);`;
   const lg=careerLegend();
   const traits=playerTraits();
   const teams=careerTeams();
@@ -1400,24 +1541,16 @@ function statCardView(backAction){
           <div style="font-size:11px; color:#c7c7d2; margin:0 0 2px 4px;">📈 歷年評分趨勢（上＝高分）</div>
           ${hist.length>=2? ratingChart(hist) : `<div class="muted center" style="padding:16px; font-size:11px;">賽季不足，尚無趨勢圖</div>`}
         </div>
-        <div style="margin:14px 0 12px; text-align:center; background:${panel}; border-radius:14px; padding:11px; border:1px solid ${hexA(t.main,.35)}; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
-          <span style="font-size:12px; color:#c7c7d2;">巔峰能力 OVR ${peak}，超越了 </span><span style="font-size:24px; font-weight:900; color:${t.main};">${pct}%</span><span style="font-size:12px; color:#c7c7d2;"> 的球員 🌍</span>
-        </div>
-        <div style="margin:12px 0; background:${panel}; border:1px solid ${hexA(t.main,.28)}; border-radius:14px; padding:11px 13px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#c7c7d2; margin-bottom:6px;"><span>⚙️ 能力數值</span><span>OVR <b style="color:${t.main};">${G.overall}</b> · 潛力 ${G.potential}</span></div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 18px;">
-            ${keyAttrs.map(([k,l])=>abar(l,G.attr[k])).join("")}
-          </div>
+        <div style="margin:14px 0 12px; background:${panel}; border:1px solid ${hexA(t.main,.28)}; border-radius:14px; padding:11px 13px 6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#c7c7d2; margin-bottom:2px;"><span>⚙️ 能力數值</span><span>OVR <b style="color:${t.main};">${G.overall}</b> · 潛力 ${G.potential}</span></div>
+          ${radarChart(keyAttrs, t.rainbow?'#ffd257':t.main)}
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
           ${stat("生涯出場",G.careerApps)}
           ${stat("生涯進球",G.careerGoals,t.main)}
           ${stat("生涯助攻",G.careerAssists)}
-          ${stat("場均進球",gpg)}
           ${stat("最佳球員",(G.careerMOTM||0)+"次",t.main)}
           ${stat("榮譽",G.trophies.length,t.main)}
-          ${stat("國家隊",G.caps+"場")}
-          ${stat("國家隊進球",G.intlGoals)}
           ${stat("財富",moneyStr(G.money))}
         </div>
         <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; font-size:11px;">
@@ -1453,7 +1586,7 @@ function downloadStatsCard(){
   const _wrapLines=(prefix,body,maxW,fs)=>{ _mf(fs,800); let cx=_mc.measureText(prefix).width, lines=1; _mf(fs,600); for(const ch of String(body)){ const w=_mc.measureText(ch).width; if(cx+w>maxW){ lines++; cx=0; } cx+=w; } return lines; };
   const _traitsLines=_wrapLines('特質：',traits.join('、'),W-PAD*2,12.5);
   const _teamsLines=_wrapLines('效力球隊：',teams,W-PAD*2,12.5);
-  const _tyStart=678, _teamsStartY=_tyStart+(_traitsLines-1)*20+22, _teamsEndY=_teamsStartY+(_teamsLines-1)*20;
+  const _tyStart=652, _teamsStartY=_tyStart+(_traitsLines-1)*20+22, _teamsEndY=_teamsStartY+(_teamsLines-1)*20;
   const H=_teamsEndY+42;
   const cv=document.createElement('canvas'); cv.width=W*s; cv.height=H*s;
   const ctx=cv.getContext('2d'); ctx.scale(s,s);
@@ -1469,14 +1602,21 @@ function downloadStatsCard(){
     const weave=(ang,color)=>{ ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(ang); ctx.translate(-W,-H); ctx.strokeStyle=color; ctx.lineWidth=1; for(let x=0;x<W*2.6;x+=11){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H*2.6); ctx.stroke(); } ctx.restore(); };
     weave(Math.PI/4, hexA(t.rainbow?p[0]:p[1],.24));
     weave(-Math.PI/4, hexA(t.rainbow?p[3]:p[0],.24));
+  } else {
+    // 無交叉紋：主色斜向漸層底
+    const gr=ctx.createLinearGradient(0,0,W,H); gr.addColorStop(0,hexA(p[2]||p[1],.22)); gr.addColorStop(.45,hexA(t.main,.09)); gr.addColorStop(.85,'transparent');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
   }
   // 頂部主色光暈
   const halo=ctx.createRadialGradient(W/2,-30,10,W/2,-30,W*0.95);
-  halo.addColorStop(0,hexA(t.main,woven?.16:.2)); halo.addColorStop(1,'transparent');
+  halo.addColorStop(0,hexA(t.main,woven?.16:.24)); halo.addColorStop(1,'transparent');
   ctx.fillStyle=halo; ctx.fillRect(0,0,W,H*0.7);
+  // 斜向反光
+  const sh=ctx.createLinearGradient(0,0,W,H*0.5); sh.addColorStop(.36,'transparent'); sh.addColorStop(.5,'rgba(255,255,255,.06)'); sh.addColorStop(.64,'transparent');
+  ctx.fillStyle=sh; ctx.fillRect(0,0,W,H);
   ctx.restore();
   // 邊框
-  roundRectPath(ctx,3,3,W-6,H-6,24); ctx.lineWidth=5; ctx.strokeStyle=t.main; ctx.stroke();
+  roundRectPath(ctx,4,4,W-8,H-8,23); ctx.lineWidth=8; ctx.strokeStyle=t.main; ctx.stroke();
   // 角落鉚釘
   [[16,16],[W-16,16],[16,H-16],[W-16,H-16]].forEach(([x,y])=>{ ctx.beginPath(); ctx.arc(x,y,4,0,7); const rg=ctx.createRadialGradient(x-1,y-1,0,x,y,4); rg.addColorStop(0,'#f2f2f2'); rg.addColorStop(.6,'#9a9aa2'); rg.addColorStop(1,'#3a3a40'); ctx.fillStyle=rg; ctx.fill(); });
   ctx.textBaseline='alphabetic';
@@ -1508,41 +1648,37 @@ function downloadStatsCard(){
     ctx.strokeStyle=t.main; ctx.lineWidth=2; ctx.beginPath(); vals.forEach((v,i)=>{ const x=X(i),y=Y(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
     vals.forEach((v,i)=>{ ctx.beginPath(); ctx.arc(X(i),Y(v),2.4,0,7); ctx.fillStyle=v>=7.5?'#ffd257':t.main; ctx.fill(); });
   } else { ctx.textAlign='center'; ctx.fillStyle='#8b8b98'; font(11,600); ctx.fillText('賽季不足，尚無趨勢圖',W/2,chY+58); }
-  // 巔峰百分比
-  const pkY=chY+chH+12;
-  roundRectPath(ctx,PAD,pkY,W-PAD*2,44,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1.2; ctx.strokeStyle=hexA(t.main,.35); ctx.stroke();
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  font(13,600); const a1=`巔峰 OVR ${peak}，超越 `, a3=' 球員';
-  font(20,900); const pctw=ctx.measureText(pct+'%').width; font(13,600); const a1w=ctx.measureText(a1).width, a3w=ctx.measureText(a3).width;
-  let sx=W/2-(a1w+pctw+a3w)/2; ctx.textAlign='left';
-  ctx.fillStyle='#c7c7d2'; font(13,600); ctx.fillText(a1,sx,pkY+22); sx+=a1w;
-  ctx.fillStyle=t.main; font(20,900); ctx.fillText(pct+'%',sx,pkY+22); sx+=pctw;
-  ctx.fillStyle='#c7c7d2'; font(13,600); ctx.fillText(a3,sx,pkY+22);
-  ctx.textBaseline='alphabetic';
-  // 能力數值（雙欄長條）
-  const abY=pkY+56, abH=118;
+  // 能力雷達圖
+  const abY=chY+chH+14, abH=210, rcol=t.rainbow?'#ffd257':t.main;
   roundRectPath(ctx,PAD,abY,W-PAD*2,abH,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=hexA(t.main,.28); ctx.stroke();
   ctx.textAlign='left'; ctx.fillStyle='#c7c7d2'; font(11,700); ctx.fillText('⚙️ 能力數值',PAD+12,abY+18);
   ctx.textAlign='right'; ctx.fillStyle='#c7c7d2'; font(11,600); ctx.fillText(`OVR ${G.overall} · 潛力 ${G.potential}`,W-PAD-12,abY+18);
-  const colW=(W-PAD*2-24)/2, bx0=PAD+12;
-  keyAttrs.forEach(([k,l],i)=>{ const v=G.attr[k]||0; const col=v>=85?'#ffd257':v>=70?t.main:v>=55?'#7fb0ff':'#8b8b98';
-    const cx=bx0+(i%2)*(colW+0), cy=abY+34+Math.floor(i/2)*28;
-    ctx.textAlign='left'; ctx.fillStyle='#c7c7d2'; font(11,600); ctx.fillText(l,cx,cy+4);
-    const trkX=cx+36, trkW=colW-36-24;
-    roundRectPath(ctx,trkX,cy-5,trkW,6,3); ctx.fillStyle='#07070c'; ctx.fill();
-    roundRectPath(ctx,trkX,cy-5,trkW*clamp(v,0,100)/100,6,3); ctx.fillStyle=col; ctx.fill();
-    ctx.textAlign='right'; ctx.fillStyle=col; font(12,800); ctx.fillText(v,cx+colW-2,cy+4);
-  });
-  // 九格數據
-  const cells=[['生涯出場',G.careerApps],['生涯進球',G.careerGoals],['生涯助攻',G.careerAssists],['場均進球',gpg],['最佳球員',(G.careerMOTM||0)+'次'],['榮譽',G.trophies.length],['國家隊',G.caps+'場'],['國家隊進球',G.intlGoals],['財富',moneyStr(G.money)]];
+  (function(){
+    const rn=keyAttrs.length, rcx=W/2, rcy=abY+abH/2+12, R=60;
+    const rang=i=>-Math.PI/2+i*2*Math.PI/rn, rpt=(i,r)=>[rcx+Math.cos(rang(i))*r, rcy+Math.sin(rang(i))*r];
+    // 格線
+    [0.5,1].forEach(f=>{ ctx.beginPath(); keyAttrs.forEach((_,i)=>{ const[x,y]=rpt(i,R*f); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.closePath(); ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1; ctx.stroke(); });
+    // 軸線
+    keyAttrs.forEach((_,i)=>{ const[x,y]=rpt(i,R); ctx.beginPath(); ctx.moveTo(rcx,rcy); ctx.lineTo(x,y); ctx.strokeStyle='rgba(255,255,255,.09)'; ctx.lineWidth=1; ctx.stroke(); });
+    // 數值多邊形
+    ctx.beginPath(); keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(G.attr[k]||0,0,100)/100); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.closePath();
+    ctx.fillStyle=hexA(rcol,.28); ctx.fill(); ctx.strokeStyle=rcol; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+    keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(G.attr[k]||0,0,100)/100); ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fillStyle=rcol; ctx.fill(); });
+    // 標籤 + 數值
+    keyAttrs.forEach(([k,l],i)=>{ const[lx,ly]=rpt(i,R+17); const a=Math.abs(lx-rcx)<12?'center':lx>rcx?'left':'right'; ctx.textAlign=a;
+      ctx.fillStyle='#c7c7d2'; font(10,600); ctx.fillText(l,lx,ly-1);
+      ctx.fillStyle=rcol; font(11,800); ctx.fillText(G.attr[k]||0,lx,ly+11); });
+  })();
+  // 六格數據
+  const cells=[['生涯出場',G.careerApps],['生涯進球',G.careerGoals],['生涯助攻',G.careerAssists],['最佳球員',(G.careerMOTM||0)+'次'],['榮譽',G.trophies.length],['財富',moneyStr(G.money)]];
   const gy=abY+abH+10, gw=(W-PAD*2-16)/3, gh=56;
   cells.forEach((c,i)=>{ const cx=PAD+(i%3)*(gw+8), cy=gy+Math.floor(i/3)*(gh+8);
     roundRectPath(ctx,cx,cy,gw,gh,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=hexA(t.main,.28); ctx.stroke();
-    ctx.fillStyle=(i===1||i===4||i===5)?t.main:'#fff'; const fv=String(c[1]); font(fv.length>=6?14:19,900); ctx.textAlign='center'; ctx.fillText(fv,cx+gw/2,cy+26);
+    ctx.fillStyle=(i===1||i===3||i===4)?t.main:'#fff'; const fv=String(c[1]); font(fv.length>=6?14:19,900); ctx.textAlign='center'; ctx.fillText(fv,cx+gw/2,cy+26);
     ctx.fillStyle='#b0b0be'; font(10.5,600); ctx.fillText(c[0],cx+gw/2,cy+45);
   });
   // 特質 + 效力球隊（自動換行）
-  let ty=gy+gh*3+16+26;
+  let ty=gy+gh*2+8+26;
   const drawWrap=(parts,x,y,maxW,fs,lh)=>{ ctx.textAlign='left'; let cx=x, cy=y; parts.forEach(pt=>{ font(fs,pt.wt||600); ctx.fillStyle=pt.col; for(const ch of pt.t){ const w=ctx.measureText(ch).width; if(cx+w>x+maxW){ cx=x; cy+=lh; } ctx.fillText(ch,cx,cy); cx+=w; } }); return cy; };
   ty=drawWrap([{t:'特質：',col:t.main,wt:800},{t:traits.join('、'),col:'#dadae6',wt:600}],PAD,ty,W-PAD*2,12.5,20)+22;
   ty=drawWrap([{t:'效力球隊：',col:t.main,wt:800},{t:teams,col:'#c7c7d2',wt:600}],PAD,ty,W-PAD*2,12.5,20);
@@ -1612,15 +1748,15 @@ function screenHome(){
         <button class="btn sec" style="margin-top:10px;" onclick="skipSeason()">⏭️ 跳過賽季</button>
       </div>`:''}
     <button class="btn sec" onclick="quickTrainHome()">🏋️ 賽前特訓（消耗體能）</button>
-    <button class="btn red" onclick="confirmRestart()" style="margin-top:14px;">🔄 重新開始生涯</button>
+    <button class="btn sec" onclick="openSettings()" style="margin-top:14px;">⚙️ 設定（音效 / 匯出存檔 / 重新開始）</button>
   </div>`;
 }
 function miniStat(ico,name,val,type){
-  const col = val>66?"var(--accent)":val>33?"var(--gold)":"var(--red)";
-  return `<div class="card" style="padding:10px; text-align:center;">
-    <div style="font-size:20px;">${ico}</div>
-    <div class="muted" style="font-size:10px;">${name}</div>
-    <div style="font-weight:800; font-size:17px; color:${col};">${val}</div>
+  val=Math.round(val);
+  const col = val>66?"#5ad07a":val>33?"#f5c451":"#f2557a";
+  return `<div class="card ring-card" style="padding:12px 8px; text-align:center;">
+    <div class="ring" style="--p:${clamp(val,0,100)}; --c:${col};"><div class="ring-in" style="color:${col};">${val}</div></div>
+    <div class="muted" style="font-size:11px; margin-top:7px;">${ico} ${name}</div>
   </div>`;
 }
 function ratingColor(r){ return r>=8?"var(--gold)":r>=7?"var(--accent)":r>=6?"var(--txt)":"var(--red)"; }
@@ -1720,19 +1856,19 @@ function screenCareer(){
   `;
 }
 function attrRowsForPos(){
-  const common=[["pace","速度"],["stamina","體力"],["strength","身體"],["composure","冷靜"]];
-  if(G.pos==="GK") return [["reflex","反應"],["handling","撲救"],["positioning","站位"],...common];
-  if(G.pos==="DF") return [["tackle","鏟球"],["positioning","站位"],["strength","身體"],["pace","速度"],["passing","傳球"],["composure","冷靜"]];
-  if(G.pos==="MF") return [["passing","傳球"],["vision","視野"],["dribble","盤帶"],["stamina","體力"],["pace","速度"],["composure","冷靜"]];
-  return [["shooting","射門"],["dribble","盤帶"],["pace","速度"],["positioning","跑位"],["passing","傳球"],["composure","冷靜"]];
+  if(G.pos==="GK") return [["diving","飛撲"],["handling","手控"],["kicking","開球"],["positioning","站位"],["reflexes","反應"],["speed","速度"]];
+  return [["pace","速度"],["shooting","射門"],["passing","傳球"],["dribbling","盤帶"],["defending","防守"],["physical","體格"]];
 }
+// 六維全部可訓練
+function trainAttrs(){ return attrRowsForPos(); }
 function statBar(label,v){
   const col = v>=80?"linear-gradient(90deg,#ffdd78,#e0a010)":v>=65?"linear-gradient(90deg,#f5c451,#c98a1a)":v>=45?"linear-gradient(90deg,#54a8ff,#2f6fd0)":"linear-gradient(90deg,#6b6b78,#45454f)";
   return `<div class="stat"><div class="stat-top"><span class="stat-name">${label}</span><span class="stat-val">${v}</span></div>
     <div class="bar"><div class="bar-fill" style="width:${v}%; background:${col};"></div></div></div>`;
 }
 // 能力雷達圖（載入時由中心向外擴張）
-function radarChart(rows){
+function radarChart(rows,col){
+  col=col||'#f5c451';
   const n=rows.length, size=230, cx=size/2, cy=size/2, R=size/2-40;
   const ang=i=> -Math.PI/2 + i*2*Math.PI/n;
   const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
@@ -1741,14 +1877,14 @@ function radarChart(rows){
   let axes='', labels='';
   rows.forEach(([k,label],i)=>{ const [x,y]=pt(i,R); axes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.09)" stroke-width="1"/>`;
     const [lx,ly]=pt(i,R+16); const v=G.attr[k]||0; const anchor=Math.abs(lx-cx)<10?'middle':lx>cx?'start':'end';
-    labels+=`<text x="${lx.toFixed(1)}" y="${(ly-1).toFixed(1)}" fill="#c7c7d2" font-size="10" text-anchor="${anchor}">${label}</text><text x="${lx.toFixed(1)}" y="${(ly+11).toFixed(1)}" fill="#f5c451" font-size="11" font-weight="800" text-anchor="${anchor}">${v}</text>`;
+    labels+=`<text x="${lx.toFixed(1)}" y="${(ly-1).toFixed(1)}" fill="#c7c7d2" font-size="10" text-anchor="${anchor}">${label}</text><text x="${lx.toFixed(1)}" y="${(ly+11).toFixed(1)}" fill="${col}" font-size="11" font-weight="800" text-anchor="${anchor}">${v}</text>`;
   });
   const vpts=rows.map(([k],i)=>pt(i,R*clamp(G.attr[k]||0,0,100)/100).map(v=>v.toFixed(1)).join(',')).join(' ');
-  const dots=rows.map(([k],i)=>{ const [x,y]=pt(i,R*clamp(G.attr[k]||0,0,100)/100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="#f5c451"/>`;}).join('');
+  const dots=rows.map(([k],i)=>{ const [x,y]=pt(i,R*clamp(G.attr[k]||0,0,100)/100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${col}"/>`;}).join('');
   return `<svg class="radar" viewBox="0 0 ${size} ${size}" style="width:100%; max-width:260px; display:block; margin:2px auto;">
     ${rings}${axes}
     <g class="radar-shape" style="transform-box:view-box; transform-origin:${cx}px ${cy}px;">
-      <polygon points="${vpts}" fill="rgba(245,196,81,.25)" stroke="#f5c451" stroke-width="2" stroke-linejoin="round"/>
+      <polygon points="${vpts}" fill="${hexA(col,.25)}" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
       ${dots}
     </g>
     ${labels}
@@ -1766,7 +1902,7 @@ function trainEnergy(){
 }
 function spendTrain(n){ n=n||1; if(trainEnergy()<n){ toast(`訓練次數不足，出賽比賽可累積（每場 +${TRAIN_PER_MATCH}，上限 ${MAX_TRAIN_ENERGY}）。`); return false; } G.trainEnergy-=n; return true; }
 function screenTrain(){
-  const rows=attrRowsForPos();
+  const rows=trainAttrs();
   const te=trainEnergy();
   const teCol = te>=2?'var(--accent)':te===1?'var(--gold)':'var(--red)';
   const dis = te<=0? 'disabled style="opacity:.4;"' : '';
@@ -1774,6 +1910,7 @@ function screenTrain(){
     <h2 style="margin-top:6px;">🏋️ 訓練中心</h2>
     <p class="muted">訓練提升能力值並消耗體能。訓練次數靠<b style="color:var(--gold);">出賽比賽累積</b>（每場 +${TRAIN_PER_MATCH}、上限 ${MAX_TRAIN_ENERGY}，季前補滿）——休息只補體能、不補訓練次數，無法靠休息一直練。</p>
     <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+      <!-- 左欄：訓練重點 + 專項課程 -->
       <div style="flex:1; min-width:280px;">
         <div class="card">
           <div style="display:flex; gap:10px; margin-bottom:10px;">
@@ -1782,42 +1919,41 @@ function screenTrain(){
             <div style="flex:1; text-align:center; background:var(--panel2); border-radius:10px; padding:8px;">
               <div class="muted" style="font-size:10px;">訓練次數</div><div style="font-weight:800; color:${teCol};">${te}/${MAX_TRAIN_ENERGY}</div></div>
           </div>
-          <div class="muted" style="font-size:12px;">選擇訓練重點：${te<=0?'<span style="color:var(--red);">（次數已用完，出賽一場後恢復）</span>':''}</div>
+          <div class="muted" style="font-size:12px;">選擇訓練重點（<b style="color:var(--gold);">專注單項加成較高</b>）：${te<=0?'<span style="color:var(--red);">（次數已用完，出賽一場後恢復）</span>':''}</div>
           <div class="grid2" style="margin-top:8px;">
-            ${rows.slice(0,4).map(([k,label])=>`
+            ${rows.map(([k,label])=>`
               <button class="btn sec" style="margin-top:0;" onclick="doTrain('${k}')" ${dis}>
                 ${label} <span class="muted">${G.attr[k]}</span>
               </button>`).join("")}
           </div>
-          <button class="btn" onclick="doTrainGeneral()" ${dis}>🔥 綜合體能訓練 (全面小幅提升)</button>
-        </div>
-        <div class="card">
-          <h2 style="margin-top:0;">😴 恢復</h2>
+          <button class="btn" onclick="doTrainGeneral()" ${dis}>🔥 綜合體能訓練 (全面小幅、加成較低)</button>
           <button class="btn sec" onclick="recover()">🛌 休息恢復體能 (+30 體能)</button>
         </div>
-      </div>
-      <div style="flex:1; min-width:280px;">
         <div class="card">
           <h2 style="margin-top:0;">🧠 專項課程</h2>
           <div class="muted" style="font-size:12px; margin-bottom:8px;">花錢請專家，快速成長。</div>
           ${G.pos==="GK"?`
-          ${courseBtn("🧤","撲救特訓",120,"handling")}
-          ${courseBtn("⚡","反應強化課",130,"reflex")}
+          ${courseBtn("🧤","飛撲特訓",120,"diving")}
+          ${courseBtn("⚡","反應強化課",130,"reflexes")}
           ${courseBtn("🧭","站位判斷課",120,"positioning")}
-          ${courseBtn("🦶","開球長傳課",100,"passing")}
-          ${courseBtn("💪","重量訓練營",100,"strength")}
-          ${courseBtn("🧘","心理韌性課",150,"composure")}
+          ${courseBtn("🦶","開球長傳課",100,"kicking")}
+          ${courseBtn("🖐️","手控訓練課",110,"handling")}
+          ${courseBtn("🏃","速度訓練課",130,"speed")}
           `:`
           ${courseBtn("⚽","射門大師班",120,"shooting")}
           ${courseBtn("🎯","傳球視野課",120,"passing")}
-          ${courseBtn("🩰","盤帶技巧課",120,"dribble")}
+          ${courseBtn("🩰","盤帶技巧課",120,"dribbling")}
           ${courseBtn("⚡","速度爆發課",130,"pace")}
-          ${courseBtn("💪","重量訓練營",100,"strength")}
-          ${courseBtn("🧘","心理韌性課",150,"composure")}
+          ${courseBtn("🛡️","防守鏟球課",110,"defending")}
+          ${courseBtn("💪","體格重量營",100,"physical")}
           `}
         </div>
+      </div>
+      <!-- 右欄：進階訓練 -->
+      <div style="flex:1; min-width:280px;">
         <div class="card">
           <h2 style="margin-top:0;">🏕️ 進階訓練</h2>
+          <div class="muted" style="font-size:12px; margin-bottom:8px;">大幅成長，但消耗較高。</div>
           <button class="choice" onclick="trainingCamp()"><span class="ci">🔥</span>參加集訓營（大幅成長／高消耗）</button>
           <button class="choice" onclick="hirePrivateCoach()"><span class="ci">🧑‍🏫</span>聘請私人教練<span class="cost">${moneyStr(250)}</span></button>
         </div>
@@ -1865,13 +2001,13 @@ function doTrain(k){
   if(G.fitness<15){ toast("體能太低，先休息！"); return; }
   if(!spendTrain(1)) return;
   G.fitness=clamp(G.fitness-12,0,100);
-  const gain = growthAmount();
+  const gain = growthAmount(1.8);   // 專注單項 → 加成較高
   const before=G.attr[k];
   G.attr[k]=clamp(G.attr[k]+gain,20,99);
   const real=G.attr[k]-before;
   G.overall=calcOverall();
   G.form=clamp(G.form+2,0,100);
-  toast(real>0?`${attrLabel(k)} +${real}`:`${attrLabel(k)} 已接近上限`);
+  toast(real>0?`${attrLabel(k)} +${real}（專注訓練）`:`${attrLabel(k)} 已達滿值 99`);
   softRender();
 }
 function doTrainGeneral(){
@@ -1879,28 +2015,29 @@ function doTrainGeneral(){
   if(G.fitness<20){ toast("體能太低，先休息！"); return; }
   if(!spendTrain(1)) return;
   G.fitness=clamp(G.fitness-18,0,100);
-  const rows=attrRowsForPos();
+  const rows=trainAttrs();   // 含體力/身體，全面涵蓋
   let msg=[];
-  rows.slice(0,4).forEach(([k])=>{
-    if(chance(60)){ const g=Math.max(1,Math.round(growthAmount()/2)); const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+g,20,99); if(G.attr[k]>b) msg.push(attrLabel(k)); }
+  rows.forEach(([k])=>{
+    if(chance(55)){ const g=Math.max(1,Math.round(growthAmount()/2)); const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+g,20,99); if(G.attr[k]>b) msg.push(attrLabel(k)); }
   });
   G.overall=calcOverall();
-  toast(msg.length?`成長：${msg.join("、")}`:"訓練完成，屬性接近上限");
+  toast(msg.length?`成長：${msg.join("、")}`:"訓練完成");
   softRender();
 }
-function growthAmount(){
+function growthAmount(mul){
+  mul=mul||1;
   const gap=G.potential-G.overall;
-  if(gap<=0) return chance(20)?1:0;
-  const ageFactor = G.age<21?1.5: G.age<26?1: G.age<30?0.6:0.3;
-  let g = Math.round((rand(1,3))*ageFactor*(gap>15?1.3:gap>5?1:0.7));
-  return clamp(g,0,4);
+  // 不再因接近潛力而歸零：訓練一律至少 +1（仍受屬性 99 硬上限）
+  const ageFactor = G.age<21?1.5: G.age<26?1: G.age<30?0.7:0.5;
+  let g = Math.round((rand(1,3))*ageFactor*(gap>15?1.3:gap>5?1:gap>0?0.85:0.7)*mul);
+  return clamp(g,1,mul>1?5:4);
 }
 function trainGain(n){
   const rows=attrRowsForPos(); const [k]=pick(rows);
   G.attr[k]=clamp(G.attr[k]+n,20,99); G.overall=calcOverall();
 }
 function attrLabel(k){
-  const m={pace:"速度",stamina:"體力",strength:"身體",shooting:"射門",passing:"傳球",dribble:"盤帶",tackle:"鏟球",vision:"視野",positioning:"站位",composure:"冷靜",reflex:"反應",handling:"撲救"};
+  const m={pace:"速度",shooting:"射門",passing:"傳球",dribbling:"盤帶",defending:"防守",physical:"體格",diving:"飛撲",handling:"手控",kicking:"開球",positioning:"站位",reflexes:"反應",speed:"速度"};
   return m[k]||k;
 }
 function takeCourse(attr,cost){
@@ -1921,10 +2058,23 @@ function recover(){
 }
 
 /* ---------- LIFE ---------- */
+function relBar(label,v){
+  v=Math.round(v||0);
+  const col = v>=70?"linear-gradient(90deg,#5ad07a,#2f9d55)":v>=45?"linear-gradient(90deg,#f5c451,#c98a1a)":"linear-gradient(90deg,#f2557a,#c73357)";
+  return `<div style="margin-bottom:9px;"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span class="muted">${label}</span><span style="font-weight:800;">${v}</span></div>
+    <div class="bar"><div class="bar-fill" style="width:${v}%; background:${col};"></div></div></div>`;
+}
 function screenLife(){
   const rel=G.relationship;
   return `
-    <h2 style="margin-top:6px;">💬 個人生活</h2>
+    <h2 style="margin-top:6px;">🤝 人際關係</h2>
+    <div class="card">
+      ${relBar("👔 教練信任",G.coachRel||60)}
+      ${relBar("👥 更衣室氛圍",G.chem||60)}
+      ${relBar("📣 球迷愛戴",G.fanRel||50)}
+      <div class="muted" style="font-size:11px; margin-top:2px;">教練信任影響先發機會；球迷愛戴影響名氣與轉會人氣。好表現與勝利（尤其德比）都會提升。</div>
+    </div>
+    <h2>💬 個人生活</h2>
     <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
       <div style="flex:1; min-width:280px;">
         <div class="card">
@@ -2078,32 +2228,105 @@ function screenMarket(){
         </div>
         <div class="card">
           <h2 style="margin-top:0;">📈 投資理財</h2>
-          <div class="muted" style="font-size:12px; margin-bottom:8px;">閒錢可以投資，有賺有賠。</div>
-          ${investBtn("🏦","穩健基金",200,"safe")}
-          ${investBtn("📊","股票市場",300,"stock")}
-          ${investBtn("₿","加密貨幣",250,"crypto")}
-          ${investBtn("🍔","開餐廳",500,"biz")}
+          <div class="muted" style="font-size:12px; margin-bottom:8px;">有賺有賠——風險越高、波動越大，長期並非穩賺。</div>
+          ${investBtn("safe")}
+          ${investBtn("stock")}
+          ${investBtn("crypto")}
+          ${investBtn("biz")}
         </div>
       </div>
     </div>
   `;
 }
-function investBtn(ico,name,cost,type){
-  const can=G.money>=cost;
-  return `<button class="choice" onclick="invest('${type}','${name}',${cost})" ${can?'':'disabled style="opacity:.4;"'}>
-    <span class="ci">${ico}</span>${name}<span class="cost">${moneyStr(cost)}</span></button>`;
+// 投資標的：lo/hi=賠/賺時的回本倍率範圍，winP=賺的機率（期望值約 1.0–1.05，接近公平、略帶小賺）
+const INVESTMENTS={
+  safe:{ico:"🏦",name:"穩健基金",cost:200,lo:0.85,hi:1.18,winP:60,risk:"低風險"},
+  stock:{ico:"📊",name:"股票市場",cost:300,lo:0.55,hi:1.60,winP:52,risk:"中風險"},
+  crypto:{ico:"₿",name:"加密貨幣",cost:250,lo:0.10,hi:2.80,winP:36,risk:"高風險"},
+  biz:{ico:"🍔",name:"開餐廳",cost:500,lo:0.40,hi:2.00,winP:46,risk:"中高風險"},
+};
+function investBtn(type){
+  const v=INVESTMENTS[type]; const can=G.money>=10;
+  const rc = v.winP>=58?'var(--accent)':v.winP>=48?'var(--gold)':'var(--red)';
+  return `<button class="choice" onclick="openInvest('${type}')" ${can?'':'disabled style="opacity:.4;"'}>
+    <span class="ci">${v.ico}</span>
+    <div style="flex:1; min-width:0; text-align:left;">
+      <div style="font-weight:700;">${v.name} <span class="muted" style="font-size:10px;">· ${v.risk}</span></div>
+      <div style="font-size:10px;"><span style="color:${rc};">成功率 ${v.winP}%</span> <span class="muted">· 回報 ×${v.lo.toFixed(2)}–×${v.hi.toFixed(1)}</span></div>
+    </div>
+    <span style="color:var(--dim); font-size:18px; margin-left:auto;">›</span></button>`;
 }
-function invest(type,name,cost){
-  if(G.money<cost){ toast("錢不夠"); return; }
-  G.money-=cost;
-  const profile={safe:[0.85,1.3,90],stock:[0.5,1.8,70],crypto:[0.2,3.5,50],biz:[0.6,2.2,65]}[type];
-  const [lo,hi,winP]=profile;
-  const win=chance(winP);
-  const mult = win? rand(Math.round(1*100),Math.round(hi*100))/100 : rand(Math.round(lo*100),95)/100;
-  const back=Math.round(cost*mult);
+// 投資小介面：用進度條（滑桿）選擇要投入的金額
+function openInvest(type){
+  const v=INVESTMENTS[type];
+  const max=Math.max(0,Math.floor(G.money));
+  if(max<10){ toast("資金不足，無法投資"); return; }
+  const def=Math.min(max,Math.max(10,Math.round(max*0.25)));
+  const step=Math.max(1,Math.round(max/100));
+  const rc = v.winP>=58?'#5ad07a':v.winP>=48?'#f5c451':'#f2557a';
+  showModalCustom(`
+    <div style="text-align:center;">
+      <div style="width:64px; height:64px; margin:0 auto; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:32px; background:radial-gradient(circle at 50% 35%, ${rc}40, ${rc}0d); box-shadow:0 0 0 1px ${rc}55, 0 6px 20px ${rc}30;">${v.ico}</div>
+      <h3 style="margin:9px 0 3px;">${v.name}</h3>
+      <span class="inv-riskpill" style="background:${rc}22; border:1px solid ${rc}; color:${rc};">${v.risk}</span>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:13px;">
+      <div class="inv-stat"><div class="inv-stat-v" style="color:${rc};">${v.winP}%</div><div class="inv-stat-l">成功率</div></div>
+      <div class="inv-stat"><div class="inv-stat-v" style="color:var(--red);">×${v.lo.toFixed(2)}</div><div class="inv-stat-l">最差回本</div></div>
+      <div class="inv-stat"><div class="inv-stat-v" style="color:var(--accent);">×${v.hi.toFixed(1)}</div><div class="inv-stat-l">最佳回報</div></div>
+    </div>
+    <div class="card" style="margin-top:10px; text-align:center;">
+      <div class="muted" style="font-size:11px;">投入金額（可動用 <span style="color:var(--gold);">${moneyStr(max)}</span>）</div>
+      <div id="invAmt" style="font-weight:900; color:var(--gold); font-size:30px; margin:2px 0 6px; text-shadow:0 2px 14px rgba(245,196,81,.35);">${moneyStr(def)}</div>
+      <input type="range" id="invRange" min="10" max="${max}" step="${step}" value="${def}" oninput="updateInvest('${type}')" style="width:100%;">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:12px;">
+        <button class="btn sec" style="margin:0; padding:10px 2px; font-size:13px;" onclick="setInvest('${type}',0.25)">25%</button>
+        <button class="btn sec" style="margin:0; padding:10px 2px; font-size:13px;" onclick="setInvest('${type}',0.5)">50%</button>
+        <button class="btn sec" style="margin:0; padding:10px 2px; font-size:13px;" onclick="setInvest('${type}',0.75)">75%</button>
+        <button class="btn sec" style="margin:0; padding:10px 2px; font-size:13px;" onclick="setInvest('${type}',1)">全部</button>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="inv-range-bar"><div class="inv-range-loss" id="invLoss"></div><div class="inv-range-gain" id="invGain"></div></div>
+        <div style="display:flex; justify-content:space-between; font-size:10.5px; margin-top:5px; font-weight:700;"><span style="color:var(--red);" id="invLossT"></span><span style="color:var(--accent);" id="invGainT"></span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="confirmInvest('${type}')">✅ 確認投資 <span id="invBtnAmt"></span></button>
+    <button class="btn sec" onclick="closeModal()">取消</button>
+  `);
+  updateInvest(type);
+}
+function updateInvest(type){
+  const v=INVESTMENTS[type]; const r=$("#invRange"); if(!r) return;
+  const amt=parseInt(r.value)||0;
+  const a=$("#invAmt"); if(a) a.textContent=moneyStr(amt);
+  const pct=(amt-parseInt(r.min))/((parseInt(r.max)-parseInt(r.min))||1)*100;
+  r.style.background=`linear-gradient(90deg,#e0a010 ${pct}%, #33333c ${pct}%)`;
+  const maxLoss=Math.round(amt*(1-v.lo)), maxGain=Math.round(amt*(v.hi-1)), tot=(maxLoss+maxGain)||1;
+  const l=$("#invLoss"), g=$("#invGain"); if(l) l.style.width=(maxLoss/tot*100).toFixed(1)+'%'; if(g) g.style.width=(maxGain/tot*100).toFixed(1)+'%';
+  const lt=$("#invLossT"), gt=$("#invGainT"); if(lt) lt.textContent='↓ 最多賠 '+moneyStr(maxLoss); if(gt) gt.textContent='最多賺 '+moneyStr(maxGain)+' ↑';
+  const ba=$("#invBtnAmt"); if(ba) ba.textContent='· '+moneyStr(amt);
+}
+function setInvest(type,frac){
+  const r=$("#invRange"); if(!r) return;
+  const max=parseInt(r.max)||0, min=parseInt(r.min)||10;
+  r.value=Math.max(min,Math.round(max*frac));
+  updateInvest(type);
+}
+function confirmInvest(type){
+  const r=$("#invRange"); const amt=r?parseInt(r.value)||0:0;
+  closeModal(); invest(type,amt);
+}
+function invest(type,amount){
+  const v=INVESTMENTS[type]; if(!v) return;
+  amount=Math.min(Math.floor(G.money),Math.max(0,Math.round(amount||0)));
+  if(amount<10){ toast("投資金額太少"); return; }
+  G.money-=amount;
+  const win=chance(v.winP);
+  const mult = win? rand(100,Math.round(v.hi*100))/100 : rand(Math.round(v.lo*100),95)/100;
+  const back=Math.round(amount*mult);
   G.money+=back;
-  const diff=back-cost;
-  logEvent(diff>=0?"📈":"📉",`投資${name}：${diff>=0?'獲利':'虧損'} ${moneyStr(Math.abs(diff))}。`,diff>=0?"log-good":"log-bad");
+  const diff=back-amount;
+  logEvent(diff>=0?"📈":"📉",`投資${v.name} ${moneyStr(amount)}：${diff>=0?'獲利':'虧損'} ${moneyStr(Math.abs(diff))}（×${mult.toFixed(2)}）。`,diff>=0?"log-good":"log-bad");
   toast(diff>=0?`賺了 ${moneyStr(diff)}！`:`賠了 ${moneyStr(Math.abs(diff))}…`);
   checkMilestones(); save(); render();
 }
@@ -2440,9 +2663,11 @@ function rollMatch(forced){
   const opp = leagueOpponent(G.week-1);
   const oppStr = opp? opp.str + rand(-6,6) : TIER_STR[G.tier] + rand(-10,10);
   const myStr = G.overall + (G.form-60)/3 + (G.morale-50)/8 - (forced?8:0) - (G.fitness<40?6:0);
-  // 球隊越強、你越弱 → 越難擠進先發（實力達標則穩定先發）
-  const starter = G.overall >= TIER_STR[G.tier]-10 || chance(clamp(70-(TIER_STR[G.tier]-10-G.overall)*2.2, 6, 70));
-  let minutes = starter? rand(70,90) : (chance(50)? rand(15,45): 0);
+  // 球隊越強、你越弱 → 越難擠進先發（教練關係好也更容易先發）
+  const coachBonus=((G.coachRel||60)-60)*0.5;
+  const starter = G.overall >= TIER_STR[G.tier]-10 || chance(clamp(70-(TIER_STR[G.tier]-10-G.overall)*2.2 + coachBonus, 6, 88));
+  // 非先發：多數情況以替補身分登場（年輕球員機會更多），少數完全沒上場
+  let minutes = starter? rand(70,90) : (chance(G.age<=20?82:70)? rand(20,55): 0);
   const diff = myStr - oppStr + rand(-15,15);
   let myGoals, oppGoals;
   if(diff>12){ myGoals=rand(2,4); oppGoals=rand(0,1); }
@@ -2473,11 +2698,20 @@ function rollMatch(forced){
 }
 
 function commitMatch(o){
+  if(G.pos==='GK'){ o.pg=0; }   // 守門員永遠不記進球（最終保險）
+  const derby=isDerby(o.opp&&o.opp.n);
+  const dMul=derby?2:1;
   G.fitness=clamp(G.fitness - Math.round(o.minutes/5) - rand(3,8),0,100);
   G.form=clamp(G.form + (o.rating>=7?rand(3,8): o.rating>=6?rand(-2,3): -rand(3,8)),0,100);
   const won=o.myGoals>o.oppGoals;
-  G.morale=clamp(G.morale + (won?rand(2,6):o.myGoals===o.oppGoals?0:-rand(2,5)) + (o.rating>=8?4:0),0,100);
+  G.morale=clamp(G.morale + (won?rand(2,6):o.myGoals===o.oppGoals?0:-rand(2,5))*dMul + (o.rating>=8?4:0),0,100);
   if(won) G.careerW=(G.careerW||0)+1;
+  // 人際關係：表現/勝負影響教練、更衣室、球迷
+  const good=o.rating>=7.2, bad=o.rating<6;
+  G.coachRel=clamp((G.coachRel||60) + (good?rand(1,3):bad?-rand(1,3):0) + (won?1:0) + (o.red?-4:0), 0,100);
+  G.chem=clamp((G.chem||60) + (won?1:0) + (o.pa>0?1:0) + (bad?-1:0), 0,100);
+  G.fanRel=clamp((G.fanRel||50) + ((o.pg>0?o.pg*2:0) + (won?2:o.myGoals===o.oppGoals?0:-2) + (o.rating>=8?2:0))*dMul, 0,100);
+  if(derby){ logEvent("🔥",`德比大戰！對陣 ${o.opp.n} ${won?'獲勝':o.myGoals===o.oppGoals?'言和':'落敗'}（評分 ${o.rating.toFixed(1)}）。`, won?"log-gold":"log-bad"); if(won){ G.fame=clamp(G.fame+rand(2,4),0,100); } }
   G.trainEnergy=Math.min(MAX_TRAIN_ENERGY,(G.trainEnergy||0)+TRAIN_PER_MATCH);   // 出賽累積訓練次數（休息不補）
   G.seasonApps++; G.careerApps++;
   G.seasonGoals+=o.pg; G.careerGoals+=o.pg;
@@ -2657,19 +2891,25 @@ function spreadMinutes(n){
 }
 function buildTimeline(){
   const o=LM.o;
+  // 替補：非先發且上場時間不多 → 從板凳開始，中途換人上場
+  const sub = !o.starter && o.minutes>0 && o.minutes<80;
+  const onMin = sub? clamp(90-o.minutes, 25, 82) : 0;
+  LM.subOn = onMin; LM.onPitch = !sub;
   const tl=[{min:0,type:'kick'}];
+  if(sub) tl.push({min:onMin,type:'subon'});
+  const pMin=()=> sub? rand(onMin+1,89) : rand(6,88);   // 我方參與事件需在場上時
   let pgLeft=o.pg, paLeft=o.pa;
   spreadMinutes(o.myGoals).forEach(m=>{
-    if(pgLeft>0){ tl.push({min:m,type:'goal_me',player:'scorer'}); pgLeft--; }
-    else if(paLeft>0){ tl.push({min:m,type:'goal_me',player:'assist'}); paLeft--; }
-    else tl.push({min:m,type:'goal_me',player:'team'});
+    if(pgLeft>0){ tl.push({min:pMin(),type:'goal_me',player:'scorer'}); pgLeft--; }
+    else if(paLeft>0){ tl.push({min:pMin(),type:'goal_me',player:'assist'}); paLeft--; }
+    else tl.push({min:m,type:'goal_me',player:'team'});   // 隊友進球可在任何時間（含你在板凳時）
   });
   spreadMinutes(o.oppGoals).forEach(m=> tl.push({min:m,type:'goal_opp'}));
-  const flavorN=rand(3,5);
-  for(let i=0;i<flavorN;i++){ tl.push({min:rand(6,88),type:'chance'}); }
-  if(o.yellow) tl.push({min:rand(15,80),type:'yellow'});
-  if(o.red) tl.push({min:rand(35,85),type:'red'});
-  if(o.injuryData){ tl.push({min:rand(25,86),type:'injury'}); }
+  const flavorN= sub? rand(1,3) : rand(3,5);
+  for(let i=0;i<flavorN;i++){ tl.push({min:pMin(),type:'chance'}); }
+  if(o.yellow) tl.push({min: sub? rand(onMin+1,86):rand(15,80),type:'yellow'});
+  if(o.red) tl.push({min: sub? rand(onMin+2,88):rand(35,85),type:'red'});
+  if(o.injuryData){ tl.push({min: sub? rand(onMin+1,86):rand(25,86),type:'injury'}); }
   tl.push({min:45,type:'ht'});
   tl.push({min:90,type:'ft'});
   tl.sort((a,b)=> a.min-b.min);
@@ -2713,7 +2953,7 @@ function feedAdd(icon,text,cls){
 }
 function moveBall(pct){ /* 足球場已移除，保留為空 */ }
 function bumpScore(side){
-  if(side==='H'){ LM.myScore++; const el=$("#scoreH"); if(el) el.textContent=LM.myScore; }
+  if(side==='H'){ LM.myScore++; const el=$("#scoreH"); if(el) el.textContent=LM.myScore; sndGoal(); }
   else{ LM.oppScore++; const el=$("#scoreA"); if(el) el.textContent=LM.oppScore; }
   const box=$("#scoreBox"); if(box){ box.classList.remove("score-pop"); void box.offsetWidth; box.classList.add("score-pop"); }
 }
@@ -2759,9 +2999,11 @@ async function playTimeline(){
 
 async function processMoment(ev){
   const min=ev.min;
-  if(ev.type==='kick'){ feedAdd('🟢','開球！比賽正式開始。'); moveBall(50); await liveSleep(350); return; }
+  if(ev.type==='kick'){ sndWhistle(); feedAdd('🟢','開球！比賽正式開始。'); if(LM.subOn>0){ feedAdd('🪑',`你今天沒有進入先發，先在替補席待命，準備隨時上場…`); } moveBall(50); await liveSleep(350); return; }
+  if(ev.type==='subon'){ sndWhistle(); LM.onPitch=true; celebrate(true); feedAdd('🔄',`${min}' <b style="color:var(--gold);">換人！你替補上場！</b>把握每一分鐘證明自己！`,'goal'); G.morale=clamp(G.morale+3,0,100); await liveSleep(750); return; }
   if(ev.type==='ht'){ feedAdd('⏸️',`半場結束，比分 ${LM.myScore} - ${LM.oppScore}。`); moveBall(50); await liveSleep(600); return; }
   if(ev.type==='ft'){
+    sndWhistle();
     const r=LM.myScore>LM.oppScore?'你的球隊拿下勝利 🎉':LM.myScore===LM.oppScore?'雙方握手言和 🤝':'球隊惜敗 😔';
     feedAdd('🔚',`終場哨響！${r}`); await liveSleep(500); return;
   }
@@ -2783,7 +3025,7 @@ async function processMoment(ev){
     moveBall(86); await liveSleep(260);
     if(ev.player==='scorer'){
       const o=LM.o;
-      const sh=G.attr.shooting||50, dr=G.attr.dribble||50, comp=G.attr.composure||50;
+      const sh=G.attr.shooting||50, dr=G.attr.dribbling||50, comp=G.attr.passing||50;
       const rate={
         power: clamp(Math.round(60+(sh-60)*0.5),40,93),
         calm:  clamp(Math.round(74+(sh-60)*0.3+comp*0.12),58,97),
@@ -2827,7 +3069,7 @@ async function flavorChance(min){
     if(chance(60)){
       const scen=pick(['1v1','distro','cross','penalty']);
       if(scen==='1v1'){
-        const r=rateOf(44,'reflex','positioning');
+        const r=rateOf(44,'reflexes','positioning');
         const opt=await askLive(`🧤 ${min}' 對方前鋒突入禁區形成單刀！`,[
           {label:`🚀 果斷出擊封角　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'rush'},
           {label:`🧍 穩守門線封近角　<span style="color:var(--gold)">成功率 ${clamp(r+7,25,92)}%</span>`,k:'stay'}]);
@@ -2837,7 +3079,7 @@ async function flavorChance(min){
         await liveSleep(700); return;
       }
       if(scen==='distro'){
-        const r=rateOf(42,'passing','vision');
+        const r=rateOf(42,'kicking','kicking');
         const opt=await askLive(`🧤 ${min}' 你摘下高球，如何發動進攻？`,[
           {label:`⚡ 手拋快發打反擊　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'fast'},
           {label:`🦶 大腳解圍求穩　<span style="color:var(--gold)">成功率 100%</span>`,k:'safe'}]);
@@ -2846,7 +3088,7 @@ async function flavorChance(min){
         await liveSleep(500); return;
       }
       if(scen==='cross'){
-        const r=rateOf(48,'handling','strength');
+        const r=rateOf(48,'handling','diving');
         const opt=await askLive(`🧤 ${min}' 對方開出一記威脅傳中！`,[
           {label:`🙌 果斷出擊摘球　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'catch'},
           {label:`👊 保守擊出解圍　<span style="color:var(--gold)">成功率 ${clamp(r+10,25,95)}%</span>`,k:'punch'}]);
@@ -2856,7 +3098,7 @@ async function flavorChance(min){
         await liveSleep(550); return;
       }
       // penalty faced
-      const r=rateOf(30,'reflex','composure');
+      const r=rateOf(30,'reflexes','diving');
       const opt=await askLive(`🧤 ${min}' 對方獲得一記十二碼，你如何撲救？`,[
         {label:`↖️ 提前選邊撲救　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'guess'},
         {label:`👀 觀察後再反應　<span style="color:var(--gold)">成功率 ${clamp(r-6,20,80)}%</span>`,k:'read'}]);
@@ -2868,13 +3110,13 @@ async function flavorChance(min){
     feedAdd('🧤',pick([`${min}' 你飛身撲出一記勁射，全場歡呼！`,`${min}' 你穩穩摘下傳中，指揮後防。`,`${min}' 對方遠射偏出，好險！`,`${min}' 你精準長傳找到前鋒，策動反擊。`])); await liveSleep(450); return;
   }
   // ── 場上球員決策池（依位置加權挑選）──
-  const pool = G.pos==='DF'? ['through','trackback','press','aerial','protest','trackback','press']
-            : G.pos==='FW'? ['longshot','wing','through','dive','celebrate','aerial','longshot']
-            : ['through','wing','longshot','press','protest','aerial']; // MF
+  const pool = G.pos==='DF'? ['through','trackback','press','aerial','protest','trackback','press','freekick']
+            : G.pos==='FW'? ['longshot','wing','through','dive','celebrate','aerial','longshot','penalty','freekick']
+            : ['through','wing','longshot','press','protest','aerial','freekick','penalty']; // MF
   if(chance(72)){
     const s=pick(pool);
     if(s==='through'){
-      const r=rateOf(46,'passing','vision');
+      const r=rateOf(46,'passing','dribbling');
       const opt=await askLive(`🤔 ${min}' 你在中場拿球，如何處理？`,[
         {label:`⏩ 冒險直塞打身後　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'risk'},
         {label:`↔️ 穩妥橫傳控節奏　<span style="color:var(--gold)">成功率 100%</span>`,k:'safe'}]);
@@ -2883,7 +3125,7 @@ async function flavorChance(min){
       await liveSleep(450); return;
     }
     if(s==='wing'){
-      const r=rateOf(44,'dribble','pace');
+      const r=rateOf(44,'dribbling','pace');
       const opt=await askLive(`🌭 ${min}' 你在邊路一對一面對防守球員！`,[
         {label:`🌈 強行過人突破　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'take'},
         {label:`📤 早傳中找隊友　<span style="color:var(--gold)">成功率 ${clamp(r+18,40,95)}%</span>`,k:'cross'}]);
@@ -2892,7 +3134,7 @@ async function flavorChance(min){
       await liveSleep(500); return;
     }
     if(s==='longshot'){
-      const r=rateOf(30,'shooting','composure');
+      const r=rateOf(30,'shooting','passing');
       const opt=await askLive(`💥 ${min}' 禁區外你拿球，前方有一絲空檔！`,[
         {label:`🚀 起腳遠射　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'shoot'},
         {label:`🎯 分球給隊友　<span style="color:var(--gold)">穩健</span>`,k:'pass'}]);
@@ -2901,7 +3143,7 @@ async function flavorChance(min){
       await liveSleep(600); return;
     }
     if(s==='press'){
-      const r=rateOf(50,'tackle','pace');
+      const r=rateOf(50,'defending','pace');
       const opt=await askLive(`🛡️ ${min}' 對方球星帶球逼近，你如何防守？`,[
         {label:`⚔️ 果斷上搶斷球　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'tackle'},
         {label:`🧭 延遲防守等支援　<span style="color:var(--gold)">穩健</span>`,k:'delay'}]);
@@ -2910,7 +3152,7 @@ async function flavorChance(min){
       await liveSleep(500); return;
     }
     if(s==='aerial'){
-      const r=rateOf(46,'strength','positioning');
+      const r=rateOf(46,'physical','defending');
       const opt=await askLive(`🎯 ${min}' 角球開到禁區，你搶到有利位置！`,[
         {label:`🦅 全力衝頂攻門　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'head'},
         {label:`🧠 做球給隊友　<span style="color:var(--gold)">穩健</span>`,k:'flick'}]);
@@ -2919,7 +3161,7 @@ async function flavorChance(min){
       await liveSleep(600); return;
     }
     if(s==='trackback'){
-      const r=rateOf(52,'pace','stamina');
+      const r=rateOf(52,'pace','physical');
       const opt=await askLive(`🏃 ${min}' 對方發動快速反擊，你的位置回追！`,[
         {label:`💨 全力回追封堵　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'chase'},
         {label:`✋ 保持陣型不冒進　<span style="color:var(--gold)">穩健</span>`,k:'hold'}]);
@@ -2943,6 +3185,25 @@ async function flavorChance(min){
       else { feedAdd('🧘',`${min}' 你冷靜以對，隊友為你的成熟點讚。`); G.form=clamp(G.form+1,0,100);}
       await liveSleep(500); return;
     }
+    if(s==='freekick'){
+      const r=rateOf(24,'shooting','passing');
+      const opt=await askLive(`🎯 ${min}' 禁區邊緣獲得一記絕佳任意球位置！`,[
+        {label:`🚀 直接射門　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'shoot'},
+        {label:`🅰️ 傳中找隊友　<span style="color:var(--gold)">穩健</span>`,k:'cross'}]);
+      if(opt.k==='shoot'){ if(chance(r)){ bumpScore('H'); celebrate(true); feedAdd('⚽',`${min}' <b style="color:var(--gold);">任意球破門！</b>皮球劃出弧線直掛死角！`,'goal'); LM.o.pg++; LM.o.myGoals++; G.form=clamp(G.form+4,0,100); G.socialFollowers+=0.4; } else feedAdd('❌',`${min}' 任意球擊中人牆，可惜。`); }
+      else { if(chance(58)) feedAdd('👏',`${min}' 精準傳中製造混戰，隊友險些破門！`); else feedAdd('🧱',`${min}' 傳中被門將摘下。`); }
+      await liveSleep(650); return;
+    }
+    if(s==='penalty'){
+      const r=rateOf(74,'passing','shooting');
+      const opt=await askLive(`⚪ ${min}' 球隊獲得十二碼，你主動請纓主罰！`,[
+        {label:`🎯 冷靜推射角落　<span style="color:var(--gold)">成功率 ${r}%</span>`,k:'place'},
+        {label:`💥 大力轟門　<span style="color:var(--gold)">成功率 ${clamp(r-8,40,92)}%</span>`,k:'power'}]);
+      const win=opt.k==='place'?r:clamp(r-8,40,92);
+      if(chance(win)){ bumpScore('H'); celebrate(true); feedAdd('⚽',`${min}' <b style="color:var(--gold);">十二碼命中！</b>你頂住壓力一蹴而就！`,'goal'); LM.o.pg++; LM.o.myGoals++; G.form=clamp(G.form+3,0,100); }
+      else { feedAdd('😱',`${min}' 十二碼被門將撲出！全場惋惜…`,'oppgoal'); G.morale=clamp(G.morale-4,0,100); }
+      await liveSleep(700); return;
+    }
     // celebrate / fan interaction
     const opt=await askLive(`📣 ${min}' 球隊氣勢正盛，主場球迷高喊你的名字！`,[
       {label:`🙌 振臂回應帶動氣氛`,k:'hype'},
@@ -2960,6 +3221,7 @@ function showLiveSummary(o,meta){
   const resultTxt = won?"勝利":draw?"平手":"落敗";
   const rc=ratingColor(o.rating);
   let bits=[];
+  bits.push(`${o.starter?'先發':'🪑 替補'}出場 ${o.minutes} 分鐘`);
   if(o.pg>0) bits.push(`${o.pg} 進球 ⚽`);
   if(o.pa>0) bits.push(`${o.pa} 助攻 🅰️`);
   if(G.pos==="GK"&&o.oppGoals===0) bits.push("零封 🧤");
@@ -3126,7 +3388,9 @@ function endSeason(){
       G.clubWorldCupQual=false;
     }
   }
-  if(G._ccWinNext){ G.clubWorldCupQual=true; G._ccWinNext=false; } // 洲際冠軍 → 明年獲世俱盃資格
+  // 聯賽冠軍 或 洲際盃冠軍 → 明年獲世俱盃資格（大幅提高出現機會）
+  if(rank===1 || G._ccWinNext){ G.clubWorldCupQual=true; }
+  G._ccWinNext=false;
 
   // fame growth from season
   G.fame=clamp(G.fame + (avg>=7?rand(2,6):0) + trophies.length*3,0,100);
@@ -3153,11 +3417,14 @@ function endSeason(){
 
 function showSeasonSummary(s){
   showModalCustom(`
-    <div class="emoji">📅</div>
-    <h3>第 ${G.season} 季 賽季總結</h3>
-    <div class="card" style="margin-top:8px;">
+    <div class="ss-head">
+      <div class="ss-badge">📅</div>
+      <div class="ss-season">SEASON ${G.season}</div>
+      <div class="ss-title">賽季總結</div>
+    </div>
+    <div class="card ss-stats" style="margin-top:10px;">
       <div class="kv"><span class="k">出場</span><span class="v">${s.apps}</span></div>
-      <div class="kv"><span class="k">進球 / 助攻</span><span class="v">${s.goals} / ${s.assists}</span></div>
+      <div class="kv"><span class="k">進球 / 助攻</span><span class="v">${s.goals} ⚽ / ${s.assists} 🅰️</span></div>
       <div class="kv"><span class="k">平均評分</span><span class="v" style="color:${ratingColor(parseFloat(s.avg)||6)}">${s.avg}</span></div>
       <div class="kv"><span class="k">全場最佳</span><span class="v">${s.motm} 次</span></div>
       ${s.rank?`<div class="kv"><span class="k">聯賽名次</span><span class="v" style="color:${s.rank===1?'var(--gold)':s.rank<=3?'var(--accent)':'var(--txt)'}">第 ${s.rank} / ${s.teams} 名${s.rank===1?' 🏆':''}</span></div>`:''}
@@ -3242,11 +3509,11 @@ function offseasonDevelopment(perfAvg, perfApps, perfMotm){
   } else if(G.age>=30){
     // 衰退期：表現好可延緩衰退
     const declineChance = clamp((G.age>=35?80 : G.age>=33?60 : G.age>=31?40 : 26) - perfBoost, 10, 92);
-    ["pace","stamina","strength","reflex","dribble"].forEach(k=>{
+    (G.pos==='GK'? ["speed","reflexes","diving"] : ["pace","physical","dribbling"]).forEach(k=>{
       if(G.attr[k]!==undefined && chance(declineChance)){ const d=rand(1, G.age>=34?3:2); G.attr[k]=clamp(G.attr[k]-d,20,99); declined.push(attrLabel(k)); }
     });
-    // 老將經驗：技術/心理類可能微升（表現好機率更高）
-    if(G.age<=34 && chance(38+(great?20:good?10:0))){ const m=pick(["composure","positioning","vision","passing"]); if(G.attr[m]!==undefined){ const b=G.attr[m]; G.attr[m]=clamp(G.attr[m]+1,20,99); if(G.attr[m]>b) grew.push(attrLabel(m)); } }
+    // 老將經驗：技術類可能微升（表現好機率更高）
+    if(G.age<=34 && chance(38+(great?20:good?10:0))){ const m=pick(G.pos==='GK'?["positioning","handling","kicking"]:["passing","defending"]); if(G.attr[m]!==undefined){ const b=G.attr[m]; G.attr[m]=clamp(G.attr[m]+1,20,99); if(G.attr[m]>b) grew.push(attrLabel(m)); } }
   } else {
     // 巔峰期(26–29)：表現主導升降
     if(great){ rows.slice(0,4).forEach(([k])=>{ if(chance(48)){ const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+1,20,99); if(G.attr[k]>b) grew.push(attrLabel(k)); } }); }
@@ -3389,33 +3656,33 @@ function ratingChart(history){
 
 // 生涯最相似的傳奇球員（依位置與能力風格比對）
 const LEGENDS=[
-  {n:"Lionel Messi",pos:"FW",nat:"🇦🇷",p:{pace:80,shooting:92,passing:90,dribble:97,strength:66,vision:94,composure:96}},
-  {n:"Cristiano Ronaldo",pos:"FW",nat:"🇵🇹",p:{pace:87,shooting:94,passing:80,dribble:88,strength:83,vision:80,composure:92}},
-  {n:"Kylian Mbappé",pos:"FW",nat:"🇫🇷",p:{pace:97,shooting:90,passing:80,dribble:92,strength:76,vision:82,composure:88}},
-  {n:"Erling Haaland",pos:"FW",nat:"🇳🇴",p:{pace:89,shooting:94,passing:64,dribble:80,strength:93,vision:70,composure:88}},
-  {n:"Ronaldo Nazário",pos:"FW",nat:"🇧🇷",p:{pace:95,shooting:93,passing:74,dribble:94,strength:85,vision:80,composure:90}},
-  {n:"Robert Lewandowski",pos:"FW",nat:"🇵🇱",p:{pace:79,shooting:93,passing:78,dribble:85,strength:84,vision:80,composure:91}},
-  {n:"Neymar Jr",pos:"FW",nat:"🇧🇷",p:{pace:88,shooting:84,passing:86,dribble:95,strength:60,vision:88,composure:84}},
-  {n:"Thierry Henry",pos:"FW",nat:"🇫🇷",p:{pace:92,shooting:88,passing:80,dribble:90,strength:80,vision:84,composure:87}},
-  {n:"Zinedine Zidane",pos:"MF",nat:"🇫🇷",p:{pace:74,shooting:82,passing:92,dribble:94,strength:82,vision:93,composure:93}},
-  {n:"Andrés Iniesta",pos:"MF",nat:"🇪🇸",p:{pace:72,shooting:70,passing:93,dribble:94,strength:60,vision:94,composure:92}},
-  {n:"Luka Modrić",pos:"MF",nat:"🇭🇷",p:{pace:74,shooting:76,passing:91,dribble:88,strength:64,vision:92,composure:88}},
-  {n:"Kevin De Bruyne",pos:"MF",nat:"🇧🇪",p:{pace:76,shooting:86,passing:94,dribble:86,strength:78,vision:94,composure:87}},
-  {n:"Xavi Hernández",pos:"MF",nat:"🇪🇸",p:{pace:64,shooting:72,passing:96,dribble:86,strength:62,vision:95,composure:90}},
-  {n:"Steven Gerrard",pos:"MF",nat:"🏴",p:{pace:78,shooting:85,passing:88,dribble:80,strength:84,vision:86,composure:82}},
-  {n:"Paolo Maldini",pos:"DF",nat:"🇮🇹",p:{pace:82,shooting:52,passing:80,dribble:75,strength:86,vision:82,composure:92}},
-  {n:"Sergio Ramos",pos:"DF",nat:"🇪🇸",p:{pace:80,shooting:66,passing:78,dribble:72,strength:89,vision:76,composure:80}},
-  {n:"Virgil van Dijk",pos:"DF",nat:"🇳🇱",p:{pace:80,shooting:56,passing:78,dribble:72,strength:92,vision:78,composure:88}},
-  {n:"Franz Beckenbauer",pos:"DF",nat:"🇩🇪",p:{pace:76,shooting:66,passing:86,dribble:80,strength:82,vision:88,composure:90}},
-  {n:"Fabio Cannavaro",pos:"DF",nat:"🇮🇹",p:{pace:82,shooting:48,passing:74,dribble:72,strength:82,vision:78,composure:86}},
-  {n:"Gianluigi Buffon",pos:"GK",nat:"🇮🇹",p:{reflex:94,handling:90,positioning:92,strength:80,composure:92,pace:58}},
-  {n:"Manuel Neuer",pos:"GK",nat:"🇩🇪",p:{reflex:92,handling:90,positioning:94,strength:82,composure:90,pace:72}},
-  {n:"Iker Casillas",pos:"GK",nat:"🇪🇸",p:{reflex:95,handling:86,positioning:90,strength:74,composure:88,pace:64}},
-  {n:"Lev Yashin",pos:"GK",nat:"🇷🇺",p:{reflex:93,handling:88,positioning:90,strength:82,composure:90,pace:62}},
+  {n:"Lionel Messi",pos:"FW",nat:"🇦🇷",p:{pace:80,shooting:92,passing:91,dribbling:97,defending:34,physical:65}},
+  {n:"Cristiano Ronaldo",pos:"FW",nat:"🇵🇹",p:{pace:87,shooting:94,passing:82,dribbling:88,defending:34,physical:83}},
+  {n:"Kylian Mbappé",pos:"FW",nat:"🇫🇷",p:{pace:97,shooting:90,passing:80,dribbling:92,defending:36,physical:77}},
+  {n:"Erling Haaland",pos:"FW",nat:"🇳🇴",p:{pace:89,shooting:94,passing:65,dribbling:80,defending:45,physical:93}},
+  {n:"Ronaldo Nazário",pos:"FW",nat:"🇧🇷",p:{pace:95,shooting:93,passing:76,dribbling:94,defending:30,physical:85}},
+  {n:"Robert Lewandowski",pos:"FW",nat:"🇵🇱",p:{pace:78,shooting:93,passing:79,dribbling:85,defending:44,physical:83}},
+  {n:"Neymar Jr",pos:"FW",nat:"🇧🇷",p:{pace:88,shooting:84,passing:86,dribbling:95,defending:36,physical:60}},
+  {n:"Thierry Henry",pos:"FW",nat:"🇫🇷",p:{pace:92,shooting:88,passing:80,dribbling:91,defending:36,physical:80}},
+  {n:"Zinedine Zidane",pos:"MF",nat:"🇫🇷",p:{pace:74,shooting:82,passing:92,dribbling:94,defending:70,physical:82}},
+  {n:"Andrés Iniesta",pos:"MF",nat:"🇪🇸",p:{pace:72,shooting:71,passing:93,dribbling:94,defending:64,physical:60}},
+  {n:"Luka Modrić",pos:"MF",nat:"🇭🇷",p:{pace:74,shooting:76,passing:91,dribbling:88,defending:72,physical:66}},
+  {n:"Kevin De Bruyne",pos:"MF",nat:"🇧🇪",p:{pace:76,shooting:86,passing:94,dribbling:87,defending:64,physical:78}},
+  {n:"Xavi Hernández",pos:"MF",nat:"🇪🇸",p:{pace:64,shooting:74,passing:96,dribbling:86,defending:68,physical:62}},
+  {n:"Steven Gerrard",pos:"MF",nat:"🏴",p:{pace:78,shooting:85,passing:88,dribbling:80,defending:78,physical:84}},
+  {n:"Paolo Maldini",pos:"DF",nat:"🇮🇹",p:{pace:82,shooting:52,passing:80,dribbling:74,defending:92,physical:86}},
+  {n:"Sergio Ramos",pos:"DF",nat:"🇪🇸",p:{pace:78,shooting:66,passing:74,dribbling:70,defending:90,physical:89}},
+  {n:"Virgil van Dijk",pos:"DF",nat:"🇳🇱",p:{pace:80,shooting:56,passing:76,dribbling:72,defending:91,physical:92}},
+  {n:"Franz Beckenbauer",pos:"DF",nat:"🇩🇪",p:{pace:76,shooting:66,passing:86,dribbling:80,defending:88,physical:82}},
+  {n:"Fabio Cannavaro",pos:"DF",nat:"🇮🇹",p:{pace:82,shooting:48,passing:72,dribbling:70,defending:93,physical:82}},
+  {n:"Gianluigi Buffon",pos:"GK",nat:"🇮🇹",p:{diving:92,handling:90,kicking:76,positioning:92,reflexes:94,speed:58}},
+  {n:"Manuel Neuer",pos:"GK",nat:"🇩🇪",p:{diving:90,handling:90,kicking:88,positioning:94,reflexes:92,speed:72}},
+  {n:"Iker Casillas",pos:"GK",nat:"🇪🇸",p:{diving:94,handling:85,kicking:72,positioning:90,reflexes:95,speed:64}},
+  {n:"Lev Yashin",pos:"GK",nat:"🇷🇺",p:{diving:92,handling:88,kicking:78,positioning:90,reflexes:93,speed:62}},
 ];
 function mostSimilarPlayer(){
-  const keys = G.pos==="GK"? ["reflex","handling","positioning","strength","composure","pace"]
-             : ["pace","shooting","passing","dribble","strength","vision","composure"];
+  const keys = G.pos==="GK"? ["diving","handling","kicking","positioning","reflexes","speed"]
+             : ["pace","shooting","passing","dribbling","defending","physical"];
   let best=null,bestScore=-999;
   LEGENDS.forEach(L=>{
     let sum=0,cnt=0;
@@ -3464,23 +3731,32 @@ function renderRetire(){
   const avg=G.careerApps? (G._careerRatingSum/G.careerApps):0;
   const hist=G.seasonHistory||[];
   const bestSeason = hist.length? hist.reduce((a,b)=>b.avg>a.avg?b:a) : null;
-  // Legend tier
+  // Legend tier（更多稱號、更細緻）
   let legend,badge;
   const score=G.trophies.length*3 + G.careerGoals/10 + G.caps/5 + G.fame/10 + (avg>=7.5?20:avg>=7?10:0);
-  if(score>=80){ legend="🐐 足球史上最偉大 (GOAT)"; badge="🐐"; }
-  else if(score>=55){ legend="👑 一代傳奇"; badge="👑"; }
-  else if(score>=35){ legend="⭐ 世界級球星"; badge="⭐"; }
-  else if(score>=18){ legend="✅ 成功的職業生涯"; badge="🎖️"; }
-  else{ legend="⚽ 平凡而充實的球員生涯"; badge="⚽"; }
+  if(score>=95){ legend="曠世球王 (GOAT)"; badge="🐐"; }
+  else if(score>=75){ legend="一代傳奇"; badge="👑"; }
+  else if(score>=58){ legend="世界巨星"; badge="🌟"; }
+  else if(score>=42){ legend="頂級球星"; badge="⭐"; }
+  else if(score>=28){ legend="一線主力"; badge="🎖️"; }
+  else if(score>=16){ legend="稱職的職業球員"; badge="✅"; }
+  else if(score>=8){ legend="平凡而充實的生涯"; badge="⚽"; }
+  else{ legend="短暫的足球夢"; badge="🌱"; }
+  const titles=retireTitles();
   const honors=summarizeTrophies();
 
   r.innerHTML=`
   <div class="screen fade" style="padding-bottom:30px;">
-    <div class="center" style="margin:22px 0 8px;">
-      <div style="font-size:64px;">${badge}</div>
-      <h1 style="font-size:25px;">生涯落幕</h1>
-      <div class="season-title">${legend}</div>
-      <p class="muted" style="margin-top:6px;">${G.retireReason||""}</p>
+    <div class="center rt-hero">
+      <div class="rt-badge">${badge}</div>
+      <h1 class="rt-h1">生 涯 落 幕</h1>
+      <div class="rt-title">${legend}</div>
+      <p class="muted" style="margin-top:8px;">${G.retireReason||""}</p>
+    </div>
+
+    <div class="card rt-titles-card">
+      <div class="season-title center" style="margin-bottom:10px;">🏅 生涯稱號 · ${titles.length}</div>
+      <div class="rt-chips">${titles.map(t=>`<span class="rt-chip">${t.ic} ${t.n}</span>`).join("")}</div>
     </div>
 
     <div class="card">
@@ -3606,12 +3882,12 @@ function randomLifeEvent(cb){
 const EVENTS=[
   // Fan / media
   {build:()=>({emoji:"📸",title:"球迷簽名會",text:"一群小球迷在訓練場外等你簽名。",choices:[
-    {i:"✍️",t:"耐心簽名合照",fn:()=>{G.fame=clamp(G.fame+2,0,100); G.socialFollowers+=0.2; toast("球迷好感 +，名氣提升");}},
-    {i:"🏃",t:"趕時間先走",fn:()=>{G.fame=clamp(G.fame-1,0,100); toast("有球迷失望…");}}
+    {i:"✍️",t:"耐心簽名合照",fn:()=>{G.fame=clamp(G.fame+2,0,100); G.socialFollowers+=0.2; G.fanRel=clamp((G.fanRel||50)+5,0,100); toast("球迷愛戴 +，名氣提升");}},
+    {i:"🏃",t:"趕時間先走",fn:()=>{G.fame=clamp(G.fame-1,0,100); G.fanRel=clamp((G.fanRel||50)-4,0,100); toast("有球迷失望…");}}
   ]})},
   {build:()=>({emoji:"🎤",title:"賽後採訪",text:"記者問你對球隊近況的看法。",choices:[
-    {i:"🙏",t:"謙虛回應，稱讚隊友",fn:()=>{G.morale=clamp(G.morale+4,0,100); toast("更衣室氣氛融洽");}},
-    {i:"😤",t:"高調放話下場必贏",fn:()=>{if(chance(50)){G.fame=clamp(G.fame+3,0,100);G.form=clamp(G.form+4,0,100);toast("霸氣宣言引發熱議");}else{G.form=clamp(G.form-5,0,100);toast("壓力上身…");}}}
+    {i:"🙏",t:"謙虛回應，稱讚隊友",fn:()=>{G.morale=clamp(G.morale+4,0,100); G.chem=clamp((G.chem||60)+4,0,100); G.coachRel=clamp((G.coachRel||60)+3,0,100); toast("更衣室氣氛融洽");}},
+    {i:"😤",t:"高調放話下場必贏",fn:()=>{G.fanRel=clamp((G.fanRel||50)+4,0,100); if(chance(50)){G.fame=clamp(G.fame+3,0,100);G.form=clamp(G.form+4,0,100);toast("霸氣宣言引發熱議");}else{G.form=clamp(G.form-5,0,100);G.coachRel=clamp((G.coachRel||60)-3,0,100);toast("教練不太滿意…");}}}
   ]})},
   // Teammate
   {build:()=>({emoji:"🍽️",title:"隊友聚餐",text:"隊長邀請大家聚餐增進感情。",choices:[
@@ -3619,8 +3895,8 @@ const EVENTS=[
     {i:"🏠",t:"回家休息",fn:()=>{G.fitness=clamp(G.fitness+5,0,100); toast("好好休息");}}
   ]})},
   {build:()=>({emoji:"😠",title:"更衣室衝突",text:"一名隊友在訓練中對你嗆聲。",choices:[
-    {i:"🤝",t:"主動和解",fn:()=>{G.morale=clamp(G.morale+5,0,100); toast("化解矛盾");}},
-    {i:"👊",t:"強硬回擊",fn:()=>{if(chance(50)){G.morale=clamp(G.morale+3,0,100);toast("贏得尊重");}else{G.morale=clamp(G.morale-8,0,100);logEvent("😠","更衣室內訌，氣氛緊張。","log-bad");toast("鬧僵了…");}}}
+    {i:"🤝",t:"主動和解",fn:()=>{G.morale=clamp(G.morale+5,0,100); G.chem=clamp((G.chem||60)+6,0,100); toast("化解矛盾，更衣室 +");}},
+    {i:"👊",t:"強硬回擊",fn:()=>{if(chance(50)){G.morale=clamp(G.morale+3,0,100);G.chem=clamp((G.chem||60)+3,0,100);toast("贏得尊重");}else{G.morale=clamp(G.morale-8,0,100);G.chem=clamp((G.chem||60)-8,0,100);logEvent("😠","更衣室內訌，氣氛緊張。","log-bad");toast("鬧僵了…");}}}
   ]})},
   // Money / brand
   {build:()=>({emoji:"💸",title:"投資邀約",text:"一位朋友邀你投資他的新創公司。",choices:[
@@ -3642,8 +3918,8 @@ const EVENTS=[
   ]})},
   // Coach relationship
   {build:()=>({emoji:"📋",title:"戰術會議",text:"教練找你討論新的戰術定位。",choices:[
-    {i:"👍",t:"接受新角色",fn:()=>{if(chance(60)){trainGain(1);G.form=clamp(G.form+6,0,100);toast("適應良好，狀態提升");}else{G.form=clamp(G.form-4,0,100);toast("還在磨合…");}}},
-    {i:"🙅",t:"堅持原本踢法",fn:()=>{G.morale=clamp(G.morale-3,0,100); toast("與教練有分歧");}}
+    {i:"👍",t:"接受新角色",fn:()=>{G.coachRel=clamp((G.coachRel||60)+5,0,100); if(chance(60)){trainGain(1);G.form=clamp(G.form+6,0,100);toast("適應良好，教練信任 +");}else{G.form=clamp(G.form-4,0,100);toast("還在磨合…");}}},
+    {i:"🙅",t:"堅持原本踢法",fn:()=>{G.morale=clamp(G.morale-3,0,100); G.coachRel=clamp((G.coachRel||60)-5,0,100); toast("與教練有分歧");}}
   ]})},
   // Gambling temptation
   {build:()=>({emoji:"🎰",title:"賭球誘惑",text:"有人暗示你可以「配合」一場比賽，報酬豐厚。",choices:[
@@ -3704,7 +3980,7 @@ const EVENTS=[
     {i:"😎",t:"我有自己的一套",fn:()=>{G.morale=clamp(G.morale-2,0,100);toast("錯過學習機會");}}
   ]})},
   {build:()=>({emoji:"🥗",title:"營養師計畫",text:"球隊營養師為你量身打造專屬飲食菜單。",choices:[
-    {i:"✅",t:"嚴格執行",fn:()=>{G.fitness=clamp(G.fitness+12,0,100);if(chance(40)){const b=G.attr.stamina;G.attr.stamina=clamp(G.attr.stamina+1,20,99);G.overall=calcOverall();}toast("體能提升");}},
+    {i:"✅",t:"嚴格執行",fn:()=>{G.fitness=clamp(G.fitness+12,0,100);if(chance(40)){const k=G.pos==='GK'?'speed':'physical';G.attr[k]=clamp((G.attr[k]||60)+1,20,99);G.overall=calcOverall();}toast("體能提升");}},
     {i:"🍔",t:"偶爾放縱",fn:()=>{G.morale=clamp(G.morale+4,0,100);toast("嘴巴爽了");}}
   ]})},
   {build:()=>({emoji:"📣",title:"球迷抗議",text:"近期表現低迷，部分球迷在球場外拉布條抗議。",choices:[
@@ -3809,6 +4085,55 @@ const EVENTS=[
     {i:"👨‍⚖️",t:"請律師抗辯",fn:()=>{if(chance(55)){toast("官司勝訴，無需賠償");}else{const p=Math.min(G.money,rand(80,200));G.money-=p;logEvent("⚖️",`合約糾紛敗訴，賠償 ${moneyStr(p)}。`,"log-bad");toast("賠了一筆…");}}},
     {i:"🤝",t:"和解了事",fn:()=>{const p=Math.min(G.money,100);G.money-=p;toast(`花 ${moneyStr(p)} 和解`);}}
   ]}),cond:()=>G.money>=100 && G.fame>=30},
+  // ── 隊長 / 領導 ──
+  {build:()=>({emoji:"🎽",title:"隊長臂章",text:"教練考慮讓你戴上隊長臂章，扛起球隊。",choices:[
+    {i:"💪",t:"接下重任",fn:()=>{G.captain=true;G.coachRel=clamp((G.coachRel||60)+6,0,100);G.chem=clamp((G.chem||60)+5,0,100);G.morale=clamp(G.morale+6,0,100);G.fame=clamp(G.fame+3,0,100);logEvent("🎽","獲選為球隊隊長！","log-gold");toast("你是隊長了！");}},
+    {i:"🙏",t:"時機未到，婉謝",fn:()=>{G.coachRel=clamp((G.coachRel||60)+1,0,100);toast("低調成長");}}
+  ]}),cond:()=>!G.captain && G.overall>=70 && (G.coachRel||60)>=65},
+  // ── 家庭 / 健康 ──
+  {build:()=>({emoji:"🎂",title:"生日派對",text:"今天是你的生日，隊友想幫你慶生。",choices:[
+    {i:"🥳",t:"辦場派對",fn:()=>{G.money-=Math.min(G.money,rand(20,60));G.chem=clamp((G.chem||60)+5,0,100);G.morale=clamp(G.morale+8,0,100);toast("和大家同樂，士氣大增");}},
+    {i:"🏋️",t:"低調訓練",fn:()=>{G.form=clamp(G.form+3,0,100);toast("專注自我提升");}}
+  ]})},
+  {build:()=>({emoji:"🏥",title:"家人病倒",text:"家中長輩身體不適住院，你很擔心。",choices:[
+    {i:"❤️",t:"請假回家照顧",fn:()=>{G.money-=Math.min(G.money,rand(10,40));G.morale=clamp(G.morale-4,0,100);G.form=clamp(G.form-3,0,100);logEvent("🏥","回家照顧家人，暫時分心。","");toast("家人最重要");}},
+    {i:"📞",t:"安排最好的醫療並專注比賽",fn:()=>{G.money-=Math.min(G.money,rand(30,80));G.morale=clamp(G.morale+3,0,100);toast("盡力兼顧");}}
+  ]})},
+  {build:()=>({emoji:"🐶",title:"領養寵物",text:"你在收容所遇到一隻可愛的狗狗。",choices:[
+    {i:"🐾",t:"帶牠回家",fn:()=>{G.morale=clamp(G.morale+7,0,100);G.socialFollowers+=0.3;toast("多了個毛小孩夥伴");}},
+    {i:"🙂",t:"下次再說",fn:()=>{toast("先專注生涯");}}
+  ]})},
+  // ── 名聲 / 商業 ──
+  {build:()=>({emoji:"🏆",title:"頒獎典禮",text:"你受邀出席年度足球頒獎典禮。",choices:[
+    {i:"🤵",t:"盛裝出席走紅毯",fn:()=>{G.fame=clamp(G.fame+4,0,100);G.socialFollowers+=G.socialFollowers*0.05+0.3;G.fanRel=clamp((G.fanRel||50)+3,0,100);toast("鎂光燈焦點");}},
+    {i:"🛌",t:"婉拒，在家休息",fn:()=>{G.fitness=clamp(G.fitness+6,0,100);toast("養精蓄銳");}}
+  ]}),cond:()=>G.fame>=35},
+  {build:()=>({emoji:"📕",title:"出版自傳",text:"出版社邀你出一本個人自傳。",choices:[
+    {i:"✍️",t:"授權撰寫",fn:()=>{const pay=Math.round((G.fame+20)*rand(4,9));G.money+=pay;G.fame=clamp(G.fame+3,0,100);logEvent("📕",`出版自傳，版稅 ${moneyStr(pay)}。`,"log-gold");toast(`自傳大賣 +${moneyStr(pay)}`);}},
+    {i:"🤐",t:"生涯還沒到時候",fn:()=>{toast("故事還在寫");}}
+  ]}),cond:()=>G.fame>=45},
+  {build:()=>({emoji:"🎮",title:"電競聯名",text:"知名遊戲想找你當封面代言與電競聯名。",choices:[
+    {i:"🕹️",t:"接下聯名",fn:()=>{const pay=Math.round((G.fame+15)*rand(3,7));G.money+=pay;G.socialFollowers+=G.socialFollowers*0.06+0.4;toast(`封面人物 +${moneyStr(pay)}`);}},
+    {i:"⚽",t:"專注足球",fn:()=>{G.form=clamp(G.form+2,0,100);toast("低調");}}
+  ]}),cond:()=>G.fame>=30},
+  // ── 逆境 / 挑戰 ──
+  {build:()=>({emoji:"😔",title:"狀態低潮",text:"連續幾場表現不佳，你陷入自我懷疑。",choices:[
+    {i:"🧠",t:"找運動心理師",fn:()=>{G.money-=Math.min(G.money,rand(20,50));G.form=clamp(G.form+8,0,100);G.morale=clamp(G.morale+8,0,100);logEvent("🧠","走出低潮，重拾信心。","log-good");toast("重新找回自己");}},
+    {i:"💪",t:"加倍苦練",fn:()=>{if(chance(55)){G.form=clamp(G.form+6,0,100);toast("汗水沒有白費");}else{G.fitness=clamp(G.fitness-8,0,100);toast("越練越焦慮…");}}}
+  ]}),cond:()=>G.form<45},
+  {build:()=>({emoji:"🗞️",title:"轉會傳聞",text:"媒體瘋傳你即將被賣，更衣室氣氛微妙。",choices:[
+    {i:"📢",t:"公開表態效忠球隊",fn:()=>{G.fanRel=clamp((G.fanRel||50)+6,0,100);G.coachRel=clamp((G.coachRel||60)+4,0,100);toast("球迷與教練吃了定心丸");}},
+    {i:"🤔",t:"不置可否",fn:()=>{G.fanRel=clamp((G.fanRel||50)-4,0,100);if(chance(40)){G.fame=clamp(G.fame+3,0,100);toast("身價水漲船高");}else toast("球迷有些不安");}}
+  ]}),cond:()=>G.fame>=30},
+  // ── 公益 / 成長 ──
+  {build:()=>({emoji:"🎓",title:"進修教練證",text:"你利用休賽期去進修，思考退役後的路。",choices:[
+    {i:"📖",t:"報名教練課程",fn:()=>{G.money-=Math.min(G.money,rand(15,40));G.coachRel=clamp((G.coachRel||60)+3,0,100);G.badges=(G.badges||0)+1;logEvent("🎓","進修足球知識，戰術理解提升。","log-good");if(chance(40))trainGain(1);toast("為未來鋪路");}},
+    {i:"🏖️",t:"好好放假",fn:()=>{G.fitness=clamp(G.fitness+10,0,100);G.morale=clamp(G.morale+5,0,100);toast("充分休息");}}
+  ]})},
+  {build:()=>({emoji:"🌏",title:"海外公益行",text:"你受邀到偏鄉舉辦足球公益營。",choices:[
+    {i:"⚽",t:"親自帶隊指導",fn:()=>{G.fame=clamp(G.fame+3,0,100);G.fanRel=clamp((G.fanRel||50)+5,0,100);G.morale=clamp(G.morale+6,0,100);logEvent("🌏","公益足球營，散播熱愛。","log-good");toast("愛心滿滿");}},
+    {i:"💸",t:"捐款贊助",fn:()=>{G.money-=Math.min(G.money,rand(30,80));G.fame=clamp(G.fame+2,0,100);toast("默默行善");}}
+  ]})},
 ];
 
 /* ============================================================
@@ -3958,9 +4283,42 @@ function mountDecor(){
   d.innerHTML=`<img class="l" src="${LOGO}" alt=""><img class="r" src="${LOGO}" alt="">`;
   document.body.insertBefore(d, document.body.firstChild);
 }
+// 舊存檔屬性 → 新六維遷移
+function migrateAttrs(){
+  if(!G||!G.attr) return;
+  const a=G.attr;
+  const need = G.pos==='GK'? ['diving','handling','kicking','positioning','reflexes','speed'] : ['pace','shooting','passing','dribbling','defending','physical'];
+  if(need.every(k=>a[k]!=null)) return; // 已是新格式
+  const old=Object.assign({},a);
+  const v=(k,d)=> old[k]!=null? old[k] : d;
+  if(G.pos==='GK'){
+    G.attr={ diving:v('reflex',60), handling:v('handling',60), kicking:v('passing',v('kicking',55)),
+      positioning:v('positioning',60), reflexes:v('reflex',60), speed:v('pace',55) };
+  } else {
+    G.attr={ pace:v('pace',55), shooting:v('shooting',55), passing:v('passing',55),
+      dribbling:v('dribble',v('dribbling',55)), defending:v('tackle',v('defending',v('positioning',50))),
+      physical:v('strength',v('physical',v('stamina',55))) };
+  }
+  Object.keys(G.attr).forEach(k=>{ G.attr[k]=clamp(Math.round(G.attr[k]||50),20,99); });
+  G.overall=calcOverall();
+}
+function togglePhoneMode(){
+  const on=!document.body.classList.contains('phone-mode');
+  document.body.classList.toggle('phone-mode', on);
+  const b=document.getElementById('phoneToggle'); if(b){ b.classList.toggle('on',on); b.title=on?'退出手機模式':'手機模式預覽'; }
+  try{ localStorage.setItem('fl_phone', on?'1':'0'); }catch(e){}
+}
+function mountPhoneToggle(){
+  if(document.getElementById('phoneToggle')) return;
+  const b=document.createElement('button'); b.id='phoneToggle'; b.title='手機模式預覽'; b.textContent='📱';
+  b.onclick=togglePhoneMode; document.body.appendChild(b);
+  if(localStorage.getItem('fl_phone')==='1'){ document.body.classList.add('phone-mode'); b.classList.add('on'); }
+}
 function boot(){
   mountDecor();
+  mountPhoneToggle();
   if(load() && G && !G.setup){
+    migrateAttrs();
     G.screen="home";   // 每次重新載入固定回到首頁
     // 若積分榜仍含臨時填充球隊，且該聯賽現已有更多真實球隊，重建積分榜
     if(G.club && G.lg && G.lg.teams){
