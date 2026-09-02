@@ -287,15 +287,21 @@
   .sc-tier{display:inline-block; font-size:10px; font-weight:900; letter-spacing:1px; padding:2px 9px; border-radius:999px; vertical-align:middle;}
   .statcard.rainbow{border-color:transparent; background-clip:padding-box;}
   .statcard.rainbow::before{content:""; position:absolute; inset:-3px; z-index:-0; border-radius:22px;
-    background:conic-gradient(from 0deg,#ff5d5d,#ffd25d,#5dff9e,#5db8ff,#c05dff,#ff5d5d); filter:blur(.5px); animation:scSpin 6s linear infinite;}
+    background:conic-gradient(from 0deg,#ff5d5d,#ffd25d,#5dff9e,#5db8ff,#c05dff,#ff5d5d);
+    animation:scSpin 4.5s linear infinite, scHue 7s linear infinite;}
   .statcard.rainbow::after{content:""; position:absolute; inset:0; border-radius:19px; z-index:0;
     background:
+      linear-gradient(115deg, transparent 30%, rgba(255,255,255,.10) 47%, rgba(255,255,255,.02) 55%, transparent 70%),
       repeating-linear-gradient(45deg, rgba(255,110,110,.28) 0 1px, transparent 1px 11px),
       repeating-linear-gradient(-45deg, rgba(110,180,255,.28) 0 1px, transparent 1px 11px),
       radial-gradient(130% 85% at 50% -8%, rgba(200,140,255,.16), transparent 58%),
-      linear-gradient(150deg,#141018,#0a0a10);}
+      linear-gradient(150deg,#141018,#0a0a10);
+    background-size:250% 100%, auto, auto, auto, auto;
+    animation:scSheen 4s ease-in-out infinite;}
   .statcard.rainbow > *{position:relative; z-index:1;}
   @keyframes scSpin{to{transform:rotate(360deg);}}
+  @keyframes scHue{to{filter:blur(.5px) hue-rotate(360deg);}}
+  @keyframes scSheen{0%{background-position:-120% 0,0 0,0 0,0 0,0 0;} 100%{background-position:220% 0,0 0,0 0,0 0,0 0;}}
   .howto{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015)); transition:border-color .25s;}
   .howto.open{border-color:rgba(245,196,81,.3);}
   .howto-head{display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;}
@@ -882,8 +888,8 @@ function newGame(){
 function baseAttrs(pos){
   // 0-99 scale, young player — FIFA 式六維；依位置給強弱項（起步就有位置特色）
   const g  = ()=>rand(40,52);   // 一般
-  const hi = ()=>rand(50,60);   // 該位置強項
-  const lo = ()=>rand(28,40);   // 該位置弱項
+  const hi = ()=>rand(55,66);   // 該位置強項（更突出）
+  const lo = ()=>rand(18,28);   // 該位置弱項（更明顯）
   if(pos==="GK") return {diving:hi(), handling:hi(), kicking:g(), positioning:hi(), reflexes:hi(), speed:lo()};
   if(pos==="FW") return {pace:hi(), shooting:hi(), passing:g(),  dribbling:hi(), defending:lo(), physical:g()};   // 前鋒：攻高、防守低
   if(pos==="DF") return {pace:g(),  shooting:lo(), passing:g(),  dribbling:lo(), defending:hi(), physical:hi()};  // 後衛：防守/體格高、射門盤帶低
@@ -1459,7 +1465,7 @@ function screenAchievements(){
    ============================================================ */
 function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
 function cardTier(ovr){
-  if(ovr>=96) return {key:'rainbow',label:'流動彩',main:'#ff5db1',pal:['#ff5d5d','#ffd25d','#5dff9e','#5db8ff','#c05dff'],rainbow:true};
+  if(ovr>=99) return {key:'rainbow',label:'流動彩虹',main:'#ff5db1',pal:['#ff5d5d','#ffd25d','#5dff9e','#5db8ff','#c05dff'],rainbow:true};
   if(ovr>=91) return {key:'amethyst',label:'紫金級',main:'#c79bff',pal:['#7d3ff5','#c79bff','#ffd873']};
   if(ovr>=81) return {key:'diamond',label:'鑽石級',main:'#5fd3ff',pal:['#2f9fd0','#7fe3ff','#d6f6ff']};
   if(ovr>=71) return {key:'gold',label:'金級',main:'#f5c451',pal:['#d99b1f','#f5c451','#ffe9a8']};
@@ -2870,14 +2876,14 @@ function simulateMatchSilent(forced){
 function computeRating(pg,pa,tf,ta,perfRoll,minutes){
   let r=6.0;
   if(G.pos==="GK"){
-    r = ta===0? 7.5 : ta===1?6.8: ta<=2?6.2:5.4;
-    r += (perfRoll-0.7)*2;
+    r = ta===0? 7.9 : ta===1?7.1: ta<=2?6.5:5.7;
+    r += (perfRoll-0.66)*2.2;
   } else {
-    r = 5.8 + (perfRoll-0.6)*3;
-    r += pg*1.1 + pa*0.7;
-    if(G.pos==="DF"){ r += ta===0?0.9: ta>=3?-0.8:0; }
+    r = 6.4 + (perfRoll-0.6)*3.3;   // 基準與上檔調高，好表現更容易拿高分
+    r += pg*1.25 + pa*0.85;
+    if(G.pos==="DF"){ r += ta===0?1.0: ta>=3?-0.7:0; }
   }
-  if(minutes<45) r=Math.min(r,7.5);
+  if(minutes<45) r=Math.min(r,7.8);
   return clamp(Math.round(r*10)/10,3.5,10);
 }
 
@@ -3401,10 +3407,13 @@ function ageDevFrac(age){
   if(age>=25) return 1.0;
   return 0.72 + (age-16)*((1.0-0.72)/9);   // 16→25 線性上升
 }
+// 位置弱項：這些能力的潛力上限大幅降低 → 弱點終生存在（前鋒練不出防守、後衛練不出射門盤帶）
+const POS_WEAK={ FW:["defending"], DF:["shooting","dribbling"], MF:[], GK:["speed"] };
 function diceAttrPot(k){
   let h=0; const s=String(k); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0;
   const off=(h%13)-6;                          // -6~+6，讓各能力潛力有差異
-  const basePot=clamp(Math.round((G.potential||75)+off), 20, 99);
+  let basePot=clamp(Math.round((G.potential||75)+off), 20, 99);
+  if((POS_WEAK[G.pos]||[]).indexOf(k)>=0) basePot=clamp(basePot-26, 30, 99);   // 位置弱項：上限砍 26
   const ageCap=Math.round(basePot*ageDevFrac(G.age));   // 目前年齡的成長上限
   return clamp(Math.min(basePot, ageCap), (G.attr[k]||20), 99);
 }
@@ -3787,6 +3796,7 @@ function advanceSeason(){
   // 擷取剛結束賽季的表現（重置前），用來決定能力升降
   const _perfAvg = G.seasonApps? G.seasonRatingSum/G.seasonApps : 0;
   const _perfApps = G.seasonApps, _perfMotm = G.seasonMOTM;
+  const _perfGoals = G.seasonGoals, _perfAssists = G.seasonAssists;
   G.age++;
   G.season++;
   G.week=0;
@@ -3798,7 +3808,7 @@ function advanceSeason(){
   G.trainEnergy=MAX_TRAIN_ENERGY;   // 季前給予訓練次數
 
   // Offseason growth / decline（依年齡曲線 + 本季表現）
-  offseasonDevelopment(_perfAvg, _perfApps, _perfMotm);
+  offseasonDevelopment(_perfAvg, _perfApps, _perfMotm, _perfGoals, _perfAssists);
 
   // Contract expiry
   if(G.contractYears<=0){
@@ -3840,7 +3850,8 @@ function maybeManagerChange(){
   toast(`${G.club.n} 換了新教練（${dispo.t}）`);
 }
 
-function offseasonDevelopment(perfAvg, perfApps, perfMotm){
+function offseasonDevelopment(perfAvg, perfApps, perfMotm, perfGoals, perfAssists){
+  perfGoals=perfGoals||0; perfAssists=perfAssists||0;
   // 本季表現評級（出賽太少視為中性偏低）：好表現→成長更快/衰退更慢；差表現→退步
   const perf = (perfApps>=5)? perfAvg : 6.2;
   const great=perf>=7.4, good=perf>=6.9, poor=(perfApps>=5 && perf<6.2), bad=(perfApps>=5 && perf<5.7);
@@ -3849,6 +3860,22 @@ function offseasonDevelopment(perfAvg, perfApps, perfMotm){
   const gap=G.potential-G.overall;
   const rows=attrRowsForPos();
   let grew=[], declined=[];
+  // 🌟 早期爆發（像 Yamal）：年輕就打出驚艷賽季 → 潛力大漲、總評瞬間躍升
+  const output=perfGoals+perfAssists;
+  const atk=(G.pos==="FW"||G.pos==="MF");
+  const breakout = G.age<=22 && perfApps>=15 && (
+      (atk && (perfGoals>=18 || output>=25)) ||
+      (perf>=7.8 && (perfMotm||0)>=8) ||
+      ((G.pos==="GK"||G.pos==="DF") && perf>=7.6 && (perfMotm||0)>=6) );
+  if(breakout){
+    const mag = (perfGoals>=25 || output>=32 || perf>=8.2) ? 2 : 1;   // 特別誇張再加強
+    if(G.potential<99) G.potential=clamp(G.potential + rand(4,7) + mag*2, 0, 99);
+    // 位置核心能力(權重高者)漲最多 → 總評明顯躍升
+    const core = G.pos==="FW"?["shooting","pace","dribbling"] : G.pos==="MF"?["passing","dribbling","pace"] : G.pos==="DF"?["defending","physical","pace"] : ["reflexes","diving","positioning"];
+    rows.forEach(([k])=>{ const g=(core.indexOf(k)>=0? rand(5,8)+mag : rand(2,4)); const b=G.attr[k]; G.attr[k]=clamp(G.attr[k]+g,20,99); if(G.attr[k]>b) grew.push(attrLabel(k)); });
+    G.fame=clamp(G.fame+rand(8,14),0,100);
+    logEvent("🌟",`一戰成名！${G.age-1}歲的驚艷賽季（${perfGoals}球 ${perfAssists}助、評分 ${perf.toFixed(1)}）讓你的潛力與名氣暴漲！`,"log-gold");
+  }
   if(G.age<=25 && gap>0){
     // 成長期：越年輕越快，並依表現加減
     const base = G.age<=19?72 : G.age<=22?55 : 38;
@@ -3940,24 +3967,24 @@ function proceedToSeason(){
    ============================================================ */
 // 依「生涯傷病史 + 位置 + 巔峰能力」推定退役年齡，不再固定 38 歲
 function retireAgeCap(){
-  let cap = 39;                                        // 基準退役年齡
-  cap -= Math.min(6, (G.careerInjuries||0)*0.5);       // 傷病累積：每次約 -0.5 歲（最多 -6）
-  cap -= Math.min(3, (G.careerMajorInjuries||0)*1);    // 大傷額外磨損
+  let cap = 40;                                        // 基準退役年齡（調高，較不易早退）
+  cap -= Math.min(4, (G.careerInjuries||0)*0.35);      // 傷病影響減緩：每次約 -0.35 歲（最多 -4）
+  cap -= Math.min(2.5, (G.careerMajorInjuries||0)*0.8);// 大傷額外磨損（上限 -2.5）
   if(G.pos==="GK") cap += 3;                            // 門將踢得最久
   else if(G.pos==="DF") cap += 1;                       // 後衛也踢得較久
   if((G.peakOverall||G.overall) >= 85) cap += 1;        // 頂級球星保養好、生涯較長
-  return clamp(Math.round(cap), 32, 43);
+  return clamp(Math.round(cap), 35, 44);                // 最低 35 歲，避免太早被迫退役
 }
 function checkRetirement(){
   const cap = retireAgeCap();
-  const worn = (G.careerInjuries||0)>=8 || (G.careerMajorInjuries||0)>=3;
+  const worn = (G.careerInjuries||0)>=10 || (G.careerMajorInjuries||0)>=4;
   // 硬性退役：達到（依傷病/位置調整後的）退役年齡上限
   if(G.age >= cap){
     triggerRetirement(`${G.age} 歲${worn?'、長年傷病纏身':''}，是時候光榮掛靴了。`);
     return true;
   }
-  // 接近上限且狀態明顯下滑 → 讓玩家選擇是否再拚一季
-  if(G.age >= cap-3 && G.overall < 66 && chance(42)){
+  // 接近上限且狀態明顯下滑 → 讓玩家選擇是否再拚一季（較不頻繁、門檻更嚴）
+  if(G.age >= cap-2 && G.overall < 60 && chance(28)){
     save(); render();
     setTimeout(()=>{
       showEvent({emoji:"🤔",title:"退役抉擇",text:`你已經 ${G.age} 歲，狀態下滑（OVR ${G.overall}）${worn?'，且傷病不斷':''}。要繼續踢球，還是光榮退役？`,
