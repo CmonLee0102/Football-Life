@@ -287,21 +287,19 @@
   .sc-tier{display:inline-block; font-size:10px; font-weight:900; letter-spacing:1px; padding:2px 9px; border-radius:999px; vertical-align:middle;}
   .statcard.rainbow{border-color:transparent; background-clip:padding-box;}
   .statcard.rainbow::before{content:""; position:absolute; inset:-3px; z-index:-0; border-radius:22px;
-    background:conic-gradient(from 0deg,#ff5d5d,#ffd25d,#5dff9e,#5db8ff,#c05dff,#ff5d5d);
-    animation:scSpin 4.5s linear infinite, scHue 7s linear infinite;}
+    background:conic-gradient(from 0deg,#141008,#ffd873,#fff3c4,#d99b1f,#241b08,#f5c451,#141008,#ffe9a8,#141008);
+    filter:blur(.4px); animation:scSpin 4.5s linear infinite;}
   .statcard.rainbow::after{content:""; position:absolute; inset:0; border-radius:19px; z-index:0;
     background:
-      linear-gradient(115deg, transparent 30%, rgba(255,255,255,.10) 47%, rgba(255,255,255,.02) 55%, transparent 70%),
-      repeating-linear-gradient(45deg, rgba(255,110,110,.28) 0 1px, transparent 1px 11px),
-      repeating-linear-gradient(-45deg, rgba(110,180,255,.28) 0 1px, transparent 1px 11px),
-      radial-gradient(130% 85% at 50% -8%, rgba(200,140,255,.16), transparent 58%),
-      linear-gradient(150deg,#141018,#0a0a10);
-    background-size:250% 100%, auto, auto, auto, auto;
-    animation:scSheen 4s ease-in-out infinite;}
+      linear-gradient(115deg, transparent 30%, rgba(255,226,150,.16) 47%, rgba(255,226,150,.03) 55%, transparent 70%),
+      repeating-linear-gradient(45deg, rgba(245,196,81,.16) 0 1px, transparent 1px 12px),
+      radial-gradient(130% 85% at 50% -8%, rgba(245,196,81,.18), transparent 58%),
+      linear-gradient(150deg,#14100a,#09090c);
+    background-size:250% 100%, auto, auto, auto;
+    animation:scSheen 4.5s ease-in-out infinite;}
   .statcard.rainbow > *{position:relative; z-index:1;}
   @keyframes scSpin{to{transform:rotate(360deg);}}
-  @keyframes scHue{to{filter:blur(.5px) hue-rotate(360deg);}}
-  @keyframes scSheen{0%{background-position:-120% 0,0 0,0 0,0 0,0 0;} 100%{background-position:220% 0,0 0,0 0,0 0,0 0;}}
+  @keyframes scSheen{0%{background-position:-120% 0,0 0,0 0,0 0;} 100%{background-position:220% 0,0 0,0 0,0 0;}}
   .howto{background:linear-gradient(160deg,rgba(245,196,81,.05),rgba(255,255,255,.015)); transition:border-color .25s;}
   .howto.open{border-color:rgba(245,196,81,.3);}
   .howto-head{display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;}
@@ -897,14 +895,19 @@ function baseAttrs(pos){
   return {pace:g(), shooting:g(), passing:g(), dribbling:g(), defending:g(), physical:g()};
 }
 
+// 每季賽事場數（50~60，季初隨機決定；舊存檔預設 55）
+function seasonGames(){ return G.seasonLen||55; }
 function calcOverall(){
   const a=G.attr, p=G.pos;
-  // 總評 = 六項能力全部加總 ÷ 5（上限 99）
+  // 總評 = 六項能力總和 ÷ 5.55（上限 99）
   const keys = (p==="GK") ? ["diving","handling","kicking","positioning","reflexes","speed"]
                           : ["pace","shooting","passing","dribbling","defending","physical"];
   let sum=0; keys.forEach(k=>{ sum+=(a[k]||0); });
-  const ov=clamp(Math.round(sum/5),1,99);
-  if(G) G.peakOverall=Math.max(G.peakOverall||0, ov); // 追蹤生涯巔峰能力
+  const ov=clamp(Math.round(sum/5.55),1,99);
+  if(G){ G.peakOverall=Math.max(G.peakOverall||0, ov);   // 追蹤生涯巔峰總評
+    if(!G.peakAttr) G.peakAttr={};
+    keys.forEach(k=>{ G.peakAttr[k]=Math.max(G.peakAttr[k]||0, a[k]||0); });   // 追蹤各能力巔峰值（供戰績卡）
+  }
   return ov;
 }
 
@@ -1291,6 +1294,7 @@ function chooseStartClub(i){
   signClub(o.club,o.tier,true);
   G.wage=clamp(Math.round(TIER_WAGE[o.tier][0]*0.35),3,60);   // 16 歲新秀合約，起薪不高
   G.contractYears=3;
+  G.seasonLen=rand(50,60);   // 首季賽事場數 50~60
   buildLeague(); genSquad();
   const d=TIER_DIFF[o.tier];
   logEvent("🎉",`${G.name} 以 16 歲之齡加盟 ${G.club.n}（${TIER_LABEL[o.tier]}），生存難度：${d.t}。`,"log-gold");
@@ -1394,12 +1398,12 @@ function renderScreen(){
 function screenLeague(){
   ensureLeague(); ensureSquad();
   const table=standings();
-  const nextOpp=G.week<38? leagueOpponent(G.week):null;
+  const nextOpp=G.week<seasonGames()? leagueOpponent(G.week):null;
   const posEmoji=m=>POSITIONS[({GK:'GK',CB:'DF',LB:'DF',RB:'DF',CDM:'MF',CM:'MF',CAM:'MF',LW:'FW',ST:'FW',RW:'FW'})[m.ab]||'MF'].emoji;
   const me=G.lg.teams.find(t=>t.me);
   return `
     ${nextOpp?(()=>{ const derby=isDerby(nextOpp.n); return `<div class="card" style="background:${derby?'linear-gradient(135deg,#2a1210,#140a0a)':'linear-gradient(135deg,#1c1a12,#101015)'}; border-color:${derby?'rgba(242,85,122,.5)':'rgba(245,196,81,.22)'};">
-      <div class="muted" style="font-size:11px;">第 ${G.week+1} / 38 輪 · 下一個對手 ${derby?'<span style="color:var(--red); font-weight:800;">· 🔥 德比大戰</span>':''}</div>
+      <div class="muted" style="font-size:11px;">第 ${G.week+1} / ${seasonGames()} 輪 · 下一個對手 ${derby?'<span style="color:var(--red); font-weight:800;">· 🔥 德比大戰</span>':''}</div>
       <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
         ${clubBadge(nextOpp.club,34)}
         <div style="flex:1;"><div style="font-weight:800; font-size:16px;">${nextOpp.n}</div><div class="muted">${derby?'<span style="color:var(--red);">宿敵對決 · 榮譽之戰</span>':'實力評估 '+nextOpp.str}</div></div>
@@ -1462,7 +1466,7 @@ function screenAchievements(){
    ============================================================ */
 function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
 function cardTier(ovr){
-  if(ovr>=99) return {key:'rainbow',label:'流動彩虹',main:'#ff5db1',pal:['#ff5d5d','#ffd25d','#5dff9e','#5db8ff','#c05dff'],rainbow:true};
+  if(ovr>=99) return {key:'rainbow',label:'流動黑金',main:'#ffd873',pal:['#d99b1f','#ffd873','#fff3c4','#f5c451','#0a0a10'],rainbow:true};
   if(ovr>=91) return {key:'amethyst',label:'紫金級',main:'#c79bff',pal:['#7d3ff5','#c79bff','#ffd873']};
   if(ovr>=81) return {key:'diamond',label:'鑽石級',main:'#5fd3ff',pal:['#2f9fd0','#7fe3ff','#d6f6ff']};
   if(ovr>=71) return {key:'gold',label:'金級',main:'#f5c451',pal:['#d99b1f','#f5c451','#ffe9a8']};
@@ -1606,7 +1610,7 @@ function statCardView(backAction){
         </div>
         <div style="margin:14px 0 12px; background:${panel}; border:1px solid ${hexA(t.main,.28)}; border-radius:14px; padding:11px 13px 6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
           <div style="display:flex; justify-content:space-between; font-size:11px; color:#c7c7d2; margin-bottom:2px;"><span>⚙️ 能力數值</span><span>OVR <b style="color:${t.main};">${G.overall}</b> · 潛力 ${G.potential}</span></div>
-          ${radarChart(keyAttrs, t.rainbow?'#ffd257':t.main)}
+          ${radarChart(keyAttrs, t.rainbow?'#ffd257':t.main, cardAttrs())}
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
           ${stat("生涯出場",G.careerApps)}
@@ -1715,8 +1719,9 @@ function downloadStatsCard(){
   const abY=chY+chH+14, abH=210, rcol=t.rainbow?'#ffd257':t.main;
   roundRectPath(ctx,PAD,abY,W-PAD*2,abH,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=hexA(t.main,.28); ctx.stroke();
   ctx.textAlign='left'; ctx.fillStyle='#c7c7d2'; font(11,700); ctx.fillText('⚙️ 能力數值',PAD+12,abY+18);
-  ctx.textAlign='right'; ctx.fillStyle='#c7c7d2'; font(11,600); ctx.fillText(`OVR ${G.overall} · 潛力 ${G.potential}`,W-PAD-12,abY+18);
+  ctx.textAlign='right'; ctx.fillStyle='#c7c7d2'; font(11,600); ctx.fillText(`OVR ${peak} · 潛力 ${G.potential}`,W-PAD-12,abY+18);
   (function(){
+    const PA=cardAttrs();
     const rn=keyAttrs.length, rcx=W/2, rcy=abY+abH/2+12, R=60;
     const rang=i=>-Math.PI/2+i*2*Math.PI/rn, rpt=(i,r)=>[rcx+Math.cos(rang(i))*r, rcy+Math.sin(rang(i))*r];
     // 格線
@@ -1724,13 +1729,13 @@ function downloadStatsCard(){
     // 軸線
     keyAttrs.forEach((_,i)=>{ const[x,y]=rpt(i,R); ctx.beginPath(); ctx.moveTo(rcx,rcy); ctx.lineTo(x,y); ctx.strokeStyle='rgba(255,255,255,.09)'; ctx.lineWidth=1; ctx.stroke(); });
     // 數值多邊形
-    ctx.beginPath(); keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(G.attr[k]||0,0,100)/100); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.closePath();
+    ctx.beginPath(); keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(PA[k]||0,0,100)/100); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.closePath();
     ctx.fillStyle=hexA(rcol,.28); ctx.fill(); ctx.strokeStyle=rcol; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
-    keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(G.attr[k]||0,0,100)/100); ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fillStyle=rcol; ctx.fill(); });
+    keyAttrs.forEach(([k],i)=>{ const[x,y]=rpt(i,R*clamp(PA[k]||0,0,100)/100); ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fillStyle=rcol; ctx.fill(); });
     // 標籤 + 數值
     keyAttrs.forEach(([k,l],i)=>{ const[lx,ly]=rpt(i,R+17); const a=Math.abs(lx-rcx)<12?'center':lx>rcx?'left':'right'; ctx.textAlign=a;
       ctx.fillStyle='#c7c7d2'; font(10,600); ctx.fillText(l,lx,ly-1);
-      ctx.fillStyle=rcol; font(11,800); ctx.fillText(G.attr[k]||0,lx,ly+11); });
+      ctx.fillStyle=rcol; font(11,800); ctx.fillText(PA[k]||0,lx,ly+11); });
   })();
   // 六格數據
   const cells=[['生涯出場',G.careerApps],['生涯進球',G.careerGoals],['生涯助攻',G.careerAssists],['最佳球員',(G.careerMOTM||0)+'次'],['榮譽',G.trophies.length],['財富',moneyStr(G.money)]];
@@ -1759,8 +1764,8 @@ function downloadStatsCard(){
 
 /* ---------- HOME ---------- */
 function screenHome(){
-  const weekLabel = G.week>=38 ? "季後休賽期" : `第 ${G.week+1} / 38 輪`;
-  const nextAction = G.week>=38 ? "進入新賽季" : "出戰下一場";
+  const weekLabel = G.week>=seasonGames() ? "季後休賽期" : `第 ${G.week+1} / ${seasonGames()} 輪`;
+  const nextAction = G.week>=seasonGames() ? "進入新賽季" : "出戰下一場";
   const avgRating = G.seasonApps? (G.seasonRatingSum/G.seasonApps).toFixed(2):"—";
   return `<div class="home-center">
     <div class="card" style="background:linear-gradient(135deg,#1c1a12,#101015); border-color:rgba(245,196,81,.22);">
@@ -1782,7 +1787,7 @@ function screenHome(){
       ${miniStat("😀","士氣",Math.round(G.morale),"mor")}
     </div>
 
-    ${(()=>{ if(G.week>=38) return ''; const opp=leagueOpponent(G.week); return opp?`
+    ${(()=>{ if(G.week>=seasonGames()) return ''; const opp=leagueOpponent(G.week); return opp?`
       <div class="card tap" onclick="nav('league')" style="border-color:rgba(245,196,81,.2);">
         <div style="display:flex; align-items:center; gap:11px;">
           <div class="muted" style="font-size:11px; white-space:nowrap;">下一戰<br>第 ${G.week+1} 輪</div>
@@ -1815,8 +1820,8 @@ function screenHome(){
           ${pend.length?`<div class="muted" style="font-size:11px; margin-top:8px;">因傷流失待復健：${pend.map(k=>`${attrLabel(k)} -${L[k]}`).join("、")}</div>`:'<div class="muted" style="font-size:11px; margin-top:8px;">已無流失能力待復健。</div>'}
         </div>`;
       })()
-      : `<button class="btn" onclick="playWeek()">${G.week>=38?'🏆 '+nextAction:'⚽ 進入比賽（即時轉播）'}</button>`}
-    ${(!G.injury && G.week<38)?`
+      : `<button class="btn" onclick="playWeek()">${G.week>=seasonGames()?'🏆 '+nextAction:'⚽ 進入比賽（即時轉播）'}</button>`}
+    ${(!G.injury && G.week<seasonGames())?`
       <div class="grid2">
         <button class="btn sec" style="margin-top:10px;" onclick="skipMatch()">⏩ 跳過比賽</button>
         <button class="btn sec" style="margin-top:10px;" onclick="skipSeason()">⏭️ 跳過賽季</button>
@@ -1940,9 +1945,11 @@ function statBar(label,v){
   return `<div class="stat"><div class="stat-top"><span class="stat-name">${label}</span><span class="stat-val">${v}</span></div>
     <div class="bar"><div class="bar-fill" style="width:${v}%; background:${col};"></div></div></div>`;
 }
-// 能力雷達圖（載入時由中心向外擴張）
-function radarChart(rows,col){
-  col=col||'#f5c451';
+// 戰績卡用：各能力取「生涯巔峰值」（不受老化/傷病回落影響）
+function cardAttrs(){ const s={}, src=G.peakAttr||{}; Object.keys(G.attr||{}).forEach(k=>{ s[k]=Math.max(src[k]||0, G.attr[k]||0); }); return s; }
+// 能力雷達圖（載入時由中心向外擴張）；vals 可指定數值來源（預設當前能力）
+function radarChart(rows,col,vals){
+  col=col||'#f5c451'; const V=vals||G.attr;
   const n=rows.length, size=230, cx=size/2, cy=size/2, R=size/2-40;
   const ang=i=> -Math.PI/2 + i*2*Math.PI/n;
   const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
@@ -1950,11 +1957,11 @@ function radarChart(rows,col){
   [0.25,0.5,0.75,1].forEach(f=>{ const pts=rows.map((_,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(',')).join(' '); rings+=`<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>`; });
   let axes='', labels='';
   rows.forEach(([k,label],i)=>{ const [x,y]=pt(i,R); axes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.09)" stroke-width="1"/>`;
-    const [lx,ly]=pt(i,R+16); const v=G.attr[k]||0; const anchor=Math.abs(lx-cx)<10?'middle':lx>cx?'start':'end';
+    const [lx,ly]=pt(i,R+16); const v=V[k]||0; const anchor=Math.abs(lx-cx)<10?'middle':lx>cx?'start':'end';
     labels+=`<text x="${lx.toFixed(1)}" y="${(ly-1).toFixed(1)}" fill="#c7c7d2" font-size="10" text-anchor="${anchor}">${label}</text><text x="${lx.toFixed(1)}" y="${(ly+11).toFixed(1)}" fill="${col}" font-size="11" font-weight="800" text-anchor="${anchor}">${v}</text>`;
   });
-  const vpts=rows.map(([k],i)=>pt(i,R*clamp(G.attr[k]||0,0,100)/100).map(v=>v.toFixed(1)).join(',')).join(' ');
-  const dots=rows.map(([k],i)=>{ const [x,y]=pt(i,R*clamp(G.attr[k]||0,0,100)/100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${col}"/>`;}).join('');
+  const vpts=rows.map(([k],i)=>pt(i,R*clamp(V[k]||0,0,100)/100).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const dots=rows.map(([k],i)=>{ const [x,y]=pt(i,R*clamp(V[k]||0,0,100)/100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${col}"/>`;}).join('');
   return `<svg class="radar" viewBox="0 0 ${size} ${size}" style="width:100%; max-width:260px; display:block; margin:2px auto;">
     ${rings}${axes}
     <g class="radar-shape" style="transform-box:view-box; transform-origin:${cx}px ${cy}px;">
@@ -2634,7 +2641,7 @@ function buildLeague(){
   const teams=[ mkTeam(G.club, _tb + clamp((G.overall-_tb)*0.28,-6,9) + rand(-2,4), true) ];   // 球隊實力＝球隊等級為主、你只小幅影響
   opps.forEach(c=>{ const ct=clubTier(c); teams.push(mkTeam(c, TIER_STR[ct]+rand(-6,9), false)); });
   const idxs=[]; for(let i=1;i<teams.length;i++) idxs.push(i);
-  const fixtures=[]; while(fixtures.length<38){ shuffle(idxs); idxs.forEach(i=>{ if(fixtures.length<38) fixtures.push(i); }); }
+  const _fx=seasonGames(); const fixtures=[]; while(fixtures.length<_fx){ shuffle(idxs); idxs.forEach(i=>{ if(fixtures.length<_fx) fixtures.push(i); }); }
   G.lg={teams, fixtures};
 }
 function ensureLeague(){ if(G && G.club && !G.lg) buildLeague(); }
@@ -2689,7 +2696,7 @@ function marketValue(){
    MATCH SIMULATION / WEEK PROGRESSION
    ============================================================ */
 function playWeek(){
-  if(G.week>=38){ endSeason(); return; }
+  if(G.week>=seasonGames()){ endSeason(); return; }
   ensureLeague(); ensureSquad();
   if(G.injury){ toast("受傷中，請休養"); return; }
   if((G.suspend||0)>0){
@@ -2715,7 +2722,7 @@ function playWeek(){
 
 // 跳過單場：即時模擬，直接彈出結果
 function skipMatch(){
-  if(G.week>=38){ endSeason(); return; }
+  if(G.week>=seasonGames()){ endSeason(); return; }
   ensureLeague(); ensureSquad();
   if(G.injury){ toast("受傷中，請休養"); return; }
   if((G.suspend||0)>0){ toast("停賽中，本輪由球隊出戰"); sitOutMatch(); return; }
@@ -2732,8 +2739,8 @@ function skipMatch(){
 
 // 跳過整季：自動模擬剩餘比賽
 function skipSeason(){
-  if(G.week>=38){ endSeason(); return; }
-  showEvent({emoji:"⏭️",title:"跳過整季",text:`將自動模擬本季剩餘 ${38-G.week} 場比賽，直接進入賽季總結。確定？`,
+  if(G.week>=seasonGames()){ endSeason(); return; }
+  showEvent({emoji:"⏭️",title:"跳過整季",text:`將自動模擬本季剩餘 ${seasonGames()-G.week} 場比賽，直接進入賽季總結。確定？`,
     choices:[
       {i:"✅",t:"確定，快轉到季末",fn:()=>{ runSkipSeason(); }},
       {i:"↩️",t:"取消",fn:()=>{}}
@@ -2742,7 +2749,7 @@ function skipSeason(){
 function runSkipSeason(){
   ensureLeague(); ensureSquad();
   let guard=0;
-  while(G.week<38 && guard<120){
+  while(G.week<seasonGames() && guard<200){
     guard++;
     if(G.injury){
       G.week++; G.injury.weeks--; G.fitness=clamp(G.fitness+15,0,100);
@@ -2914,7 +2921,7 @@ function sitOutMatch(){
   G.suspend=Math.max(0,(G.suspend||0)-1);
   G.fitness=clamp(G.fitness+10,0,100);
   logEvent("🚫",`停賽觀戰：${G.club.n} ${o.myGoals}-${o.oppGoals} ${o.opp?o.opp.n:'對手'}。`,"");
-  if(G.week>=38){ save(); endSeason(); return; }
+  if(G.week>=seasonGames()){ save(); endSeason(); return; }
   afterWeekChecks();
 }
 
@@ -3515,7 +3522,7 @@ function afterRehab(){
     logEvent("💚",`傷癒復出，重返賽場！${pend.length?`（仍有 ${pend.map(k=>attrLabel(k)).join("、")} 未完全恢復，可靠訓練練回）`:''}`,"log-good");
     G.injury=null; toast("傷癒歸來！");
   }
-  if(G.week>=38){ save(); endSeason(); return; }
+  if(G.week>=seasonGames()){ save(); endSeason(); return; }
   save(); render();
 }
 function rehabRest(){
@@ -3579,8 +3586,8 @@ function endSeason(){
   // Sponsor payouts
   let sponsorIncome=0;
   G.sponsors.forEach(s=>sponsorIncome+=s.pay);
-  // Wage income (approx 38 weeks already conceptually; give a season bonus)
-  const wageIncome = G.wage*38;
+  // Wage income（依本季場數給薪）
+  const wageIncome = G.wage*seasonGames();
   G.money += wageIncome + sponsorIncome;
 
   const avg = G.seasonApps? G.seasonRatingSum/G.seasonApps : 0;
@@ -3797,6 +3804,7 @@ function advanceSeason(){
   G.age++;
   G.season++;
   G.week=0;
+  G.seasonLen=rand(50,60);   // 新賽季賽事場數 50~60
   // reset season stats
   G.seasonGoals=0; G.seasonAssists=0; G.seasonApps=0; G.seasonRatingSum=0; G.seasonMOTM=0;
   G.seasonYellow=0; G.seasonRed=0; G.suspend=0;
