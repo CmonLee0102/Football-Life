@@ -880,9 +880,14 @@ function newGame(){
 
 /* ---------- Stat helpers ---------- */
 function baseAttrs(pos){
-  // 0-99 scale, young player — FIFA 式六維
-  const g = ()=>rand(40,58);
-  if(pos==="GK") return {diving:g(), handling:g(), kicking:g(), positioning:g(), reflexes:g(), speed:g()};
+  // 0-99 scale, young player — FIFA 式六維；依位置給強弱項（起步就有位置特色）
+  const g  = ()=>rand(40,52);   // 一般
+  const hi = ()=>rand(50,60);   // 該位置強項
+  const lo = ()=>rand(28,40);   // 該位置弱項
+  if(pos==="GK") return {diving:hi(), handling:hi(), kicking:g(), positioning:hi(), reflexes:hi(), speed:lo()};
+  if(pos==="FW") return {pace:hi(), shooting:hi(), passing:g(),  dribbling:hi(), defending:lo(), physical:g()};   // 前鋒：攻高、防守低
+  if(pos==="DF") return {pace:g(),  shooting:lo(), passing:g(),  dribbling:lo(), defending:hi(), physical:hi()};  // 後衛：防守/體格高、射門盤帶低
+  if(pos==="MF") return {pace:g(),  shooting:g(),  passing:hi(), dribbling:g(),  defending:g(),  physical:g()};   // 中場：以傳球為主、整體平均
   return {pace:g(), shooting:g(), passing:g(), dribbling:g(), defending:g(), physical:g()};
 }
 
@@ -2920,6 +2925,8 @@ function rollInjuryData(){
 }
 function applyInjuryData(d){
   G.injury={name:d.name,weeks:d.weeks,lostAttr:{}};
+  G.careerInjuries=(G.careerInjuries||0)+1;                              // 生涯傷病累計（影響退役年齡）
+  if(d.weeks>=4) G.careerMajorInjuries=(G.careerMajorInjuries||0)+1;      // 大傷累計
   // 傷病造成能力衰退：小傷主要掉狀態與體能；大傷（4 週以上）傷及硬實力（可透過復健訓練找回）
   G.form=clamp(G.form-rand(8,16),0,100);
   G.fitness=clamp(G.fitness-rand(10,20),0,100);
@@ -3604,7 +3611,7 @@ function endSeason(){
   }
   if(G.natTeam){
     const caps=rand(4,10); G.caps+=caps;
-    const ig = G.pos==="FW"? rand(0,6): G.pos==="MF"?rand(0,3):rand(0,1);
+    const ig = G.pos==="FW"? rand(0,6): G.pos==="MF"?rand(0,3): G.pos==="DF"?rand(0,1):0;   // 守門員不進球
     G.intlGoals+=ig;
     if(!natNews) natNews=`🌍 本季代表 ${G.nation.n} 出賽 ${caps} 場，攻入 ${ig} 球。`;
   }
@@ -3628,7 +3635,7 @@ function endSeason(){
       tourNews=`😞 ${G.nation.n} 未能通過${tname}資格賽，本屆無緣會內賽。`;
     } else {
       const stages=["16強","8強","4強","決賽"];
-      let tg = G.pos==="FW"?rand(0,3):G.pos==="MF"?rand(0,2):rand(0,1);
+      let tg = G.pos==="FW"?rand(0,3):G.pos==="MF"?rand(0,2): G.pos==="DF"?rand(0,1):0;   // 守門員不進球
       let tc = rand(3,4), champ=false, result="小組賽出局";
       const groupP = clamp(Math.round(36 + (teamStr-60)*1.7 + ease), 8, 96);
       if(chance(groupP)){          // 小組出線（強國幾乎必出線，弱國常止步小組）
@@ -3931,14 +3938,29 @@ function proceedToSeason(){
 /* ============================================================
    RETIREMENT
    ============================================================ */
+// 依「生涯傷病史 + 位置 + 巔峰能力」推定退役年齡，不再固定 38 歲
+function retireAgeCap(){
+  let cap = 39;                                        // 基準退役年齡
+  cap -= Math.min(6, (G.careerInjuries||0)*0.5);       // 傷病累積：每次約 -0.5 歲（最多 -6）
+  cap -= Math.min(3, (G.careerMajorInjuries||0)*1);    // 大傷額外磨損
+  if(G.pos==="GK") cap += 3;                            // 門將踢得最久
+  else if(G.pos==="DF") cap += 1;                       // 後衛也踢得較久
+  if((G.peakOverall||G.overall) >= 85) cap += 1;        // 頂級球星保養好、生涯較長
+  return clamp(Math.round(cap), 32, 43);
+}
 function checkRetirement(){
-  // forced retire at high age with decline, or voluntary prompt
-  if(G.age>=38){ triggerRetirement("年事已高，是時候掛靴了。"); return true; }
-  if(G.age>=34 && G.overall<62 && chance(40)){
-    // offer choice
+  const cap = retireAgeCap();
+  const worn = (G.careerInjuries||0)>=8 || (G.careerMajorInjuries||0)>=3;
+  // 硬性退役：達到（依傷病/位置調整後的）退役年齡上限
+  if(G.age >= cap){
+    triggerRetirement(`${G.age} 歲${worn?'、長年傷病纏身':''}，是時候光榮掛靴了。`);
+    return true;
+  }
+  // 接近上限且狀態明顯下滑 → 讓玩家選擇是否再拚一季
+  if(G.age >= cap-3 && G.overall < 66 && chance(42)){
     save(); render();
     setTimeout(()=>{
-      showEvent({emoji:"🤔",title:"退役抉擇",text:`你已經 ${G.age} 歲，狀態下滑（OVR ${G.overall}）。要繼續踢球，還是光榮退役？`,
+      showEvent({emoji:"🤔",title:"退役抉擇",text:`你已經 ${G.age} 歲，狀態下滑（OVR ${G.overall}）${worn?'，且傷病不斷':''}。要繼續踢球，還是光榮退役？`,
         choices:[
           {i:"⚽",t:"再戰一季",fn:()=>{proceedToSeason();}},
           {i:"🎖️",t:"光榮退役",fn:()=>{triggerRetirement("在球迷的掌聲中，你決定掛靴。");}}
