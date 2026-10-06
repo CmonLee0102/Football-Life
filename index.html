@@ -837,6 +837,26 @@ const TIER_LABEL={youth:"新秀聯賽",low:"中下游",mid:"中游豪門",strong
 const TIER_WAGE={youth:[3,10],low:[15,40],mid:[50,120],strong:[150,350],elite:[400,900]}; // 週薪(千歐)
 const TIER_STR={youth:45,low:58,mid:68,strong:78,elite:88};
 
+/* ============================================================
+   盃賽設定（可實際出戰的國內盃 / 洲際盃 / 世俱盃）
+   ============================================================ */
+// 各聯賽的國內盃名稱
+const DCUP_NAME={"英超":"足總盃","西甲":"國王盃","德甲":"德國盃","義甲":"義大利盃","法甲":"法國盃","葡超":"葡萄牙盃","荷甲":"荷蘭盃","蘇超":"蘇格蘭盃","巴甲":"巴西盃","阿甲":"阿根廷盃","J聯賽":"天皇盃","K聯賽":"韓國足協盃","台灣企甲":"台灣足協盃","香港超級聯賽":"香港足總盃"};
+// 洲際俱樂部盃：依聯賽決定名稱
+const CONT_EU=["英超","西甲","德甲","義甲","法甲","葡超","荷甲","蘇超"];
+function contCupName(lg){
+  if(CONT_EU.includes(lg)) return "歐洲冠軍聯賽";
+  if(lg==="巴甲"||lg==="阿甲") return "解放者盃";
+  if(lg==="J聯賽"||lg==="K聯賽"||lg==="台灣企甲"||lg==="香港超級聯賽") return "亞冠聯賽";
+  return null;
+}
+// 盃賽的輪次（每輪＝一場淘汰賽）
+const CUP_ROUNDS={
+  dom:  ["16強","8強","4強","決賽"],
+  cont: ["小組賽","16強","8強","4強","決賽"],
+  world:["4強","決賽"],
+};
+
 const AGENT_NAMES=["Jorge","Pini","Mino","Volker","Federico","陳經紀","David"];
 const FIRST_NAMES=["Leo","Kai","Marco","Luka","Diego","Yuki","Min","偉倫","家豪","Ethan","Rafa","Nico"];
 
@@ -860,8 +880,10 @@ function newGame(){
     league:"", season:1, week:0, // 0-37 (38 weeks) + offseason
     // season stats
     seasonGoals:0, seasonAssists:0, seasonApps:0, seasonRatingSum:0, seasonMOTM:0,
+    seasonCS:0, seasonGA:0,   // 守門員：本季零封 / 失球
     // career totals
     careerGoals:0, careerAssists:0, careerApps:0, trophies:[], caps:0, intlGoals:0,
+    careerCS:0, careerGA:0,   // 守門員：生涯零封 / 失球
     seasonHistory:[], // 每季紀錄 {season, age, avg, goals, apps} → 生涯評分趨勢圖
     // relationships / life
     relationship:null, // {name, love, type}
@@ -895,8 +917,8 @@ function baseAttrs(pos){
   return {pace:g(), shooting:g(), passing:g(), dribbling:g(), defending:g(), physical:g()};
 }
 
-// 每季賽事場數（50~60，季初隨機決定；舊存檔預設 55）
-function seasonGames(){ return G.seasonLen||55; }
+// 每季賽事場數＝本季賽程長度（聯賽雙循環＋盃賽）；無賽程時回退舊值
+function seasonGames(){ return (G && G.sched && G.sched.length)? G.sched.length : (G.seasonLen||55); }
 function calcOverall(){
   const a=G.attr, p=G.pos;
   // 總評 = 六項能力總和 ÷ 5.55（上限 99）
@@ -1394,22 +1416,44 @@ function renderScreen(){
   return "";
 }
 
+/* ---------- 盃賽進度卡 ---------- */
+function cupProgressHTML(){
+  const cups=(G && G.cups)? Object.values(G.cups):[];
+  if(!cups.length) return '';
+  return `<div class="card" style="border-color:rgba(245,196,81,.25);">
+    <div class="season-title" style="margin-bottom:8px;">🏟️ 本季盃賽征程</div>
+    ${cups.map(c=>{
+      const status = c.champ? `<span style="color:var(--gold); font-weight:800;">🏆 冠軍</span>`
+        : !c.alive? `<span style="color:var(--red); font-weight:800;">${c.rounds[Math.min(c.idx,c.rounds.length-1)]} 出局</span>`
+        : `<span style="color:var(--accent); font-weight:800;">進行中 · ${c.rounds[c.idx]}</span>`;
+      const dots=c.rounds.map((rn,i)=>{ const done=i<c.idx||c.champ; const cur=c.alive&&i===c.idx&&!c.champ; const out=!c.alive&&!c.champ&&i>=c.idx; const col=done?'var(--gold)':cur?'var(--accent)':out&&i===c.idx?'var(--red)':'var(--dim)'; return `<span title="${rn}" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${col};opacity:${done||cur||(out&&i===c.idx)?1:.35};"></span>`; }).join('<span style="display:inline-block;width:8px;height:2px;background:var(--dim);opacity:.3;vertical-align:middle;"></span>');
+      return `<div style="display:flex; align-items:center; gap:10px; padding:7px 2px;">
+        <div style="font-size:20px;">${cupIcon(c.tier)}</div>
+        <div style="flex:1; min-width:0;"><div style="font-weight:800;">${c.name}</div><div style="display:flex; gap:2px; margin-top:5px; align-items:center;">${dots}</div></div>
+        <div style="font-size:12px; text-align:right;">${status}${c.apps?`<div class="muted" style="font-size:10px; margin-top:2px;">出賽 ${c.apps} · ${c.goals||0} 球</div>`:''}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
 /* ---------- LEAGUE (積分榜 / 賽程 / 陣容) ---------- */
 function screenLeague(){
   ensureLeague(); ensureSquad();
   const table=standings();
-  const nextOpp=G.week<seasonGames()? leagueOpponent(G.week):null;
+  const nextFix=G.week<seasonGames()? fixtureAt(G.week):null;
+  const nextOpp=nextFix? fixtureOpp(nextFix) : (G.week<seasonGames()? leagueOpponent(G.week):null);
+  const nextCp=fixtureComp(nextFix);
   const posEmoji=m=>POSITIONS[({GK:'GK',CB:'DF',LB:'DF',RB:'DF',CDM:'MF',CM:'MF',CAM:'MF',LW:'FW',ST:'FW',RW:'FW'})[m.ab]||'MF'].emoji;
   const me=G.lg.teams.find(t=>t.me);
   return `
-    ${nextOpp?(()=>{ const derby=isDerby(nextOpp.n); return `<div class="card" style="background:${derby?'linear-gradient(135deg,#2a1210,#140a0a)':'linear-gradient(135deg,#1c1a12,#101015)'}; border-color:${derby?'rgba(242,85,122,.5)':'rgba(245,196,81,.22)'};">
-      <div class="muted" style="font-size:11px;">第 ${G.week+1} / ${seasonGames()} 輪 · 下一個對手 ${derby?'<span style="color:var(--red); font-weight:800;">· 🔥 德比大戰</span>':''}</div>
+    ${nextOpp?(()=>{ const isCup=nextCp.kind==='cup'; const derby=!isCup && isDerby(nextOpp.n); const bc=isCup?'rgba(245,196,81,.5)':derby?'rgba(242,85,122,.5)':'rgba(245,196,81,.22)'; return `<div class="card" style="background:${derby?'linear-gradient(135deg,#2a1210,#140a0a)':'linear-gradient(135deg,#1c1a12,#101015)'}; border-color:${bc};">
+      <div class="muted" style="font-size:11px;">${isCup?`<span style="color:var(--gold); font-weight:800;">${cupIcon(nextCp.tier)} ${nextCp.label} · ${nextCp.round}</span>`:`第 ${G.week+1} / ${seasonGames()} 輪 · 下一個對手`} ${derby?'<span style="color:var(--red); font-weight:800;">· 🔥 德比大戰</span>':''} ${nextFix?(nextFix.home!==false?'· 主場':'· 客場'):''}</div>
       <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
         ${clubBadge(nextOpp.club,34)}
-        <div style="flex:1;"><div style="font-weight:800; font-size:16px;">${nextOpp.n}</div><div class="muted">${derby?'<span style="color:var(--red);">宿敵對決 · 榮譽之戰</span>':'實力評估 '+nextOpp.str}</div></div>
-        <div style="font-size:24px;">${derby?'🔥':'⚔️'}</div>
+        <div style="flex:1;"><div style="font-weight:800; font-size:16px;">${nextOpp.n}</div><div class="muted">${derby?'<span style="color:var(--red);">宿敵對決 · 榮譽之戰</span>':(isCup?'淘汰賽 · 一戰定生死':'實力評估 '+nextOpp.str)}</div></div>
+        <div style="font-size:24px;">${isCup?cupIcon(nextCp.tier):derby?'🔥':'⚔️'}</div>
       </div>
     </div>`;})():''}
+    ${cupProgressHTML()}
     <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
       <div style="flex:1.5; min-width:300px;">
         <h2 style="margin-top:6px;">${leagueLogo(G.league,22)} ${G.league} 積分榜</h2>
@@ -1614,8 +1658,8 @@ function statCardView(backAction){
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
           ${stat("生涯出場",G.careerApps)}
-          ${stat("生涯進球",G.careerGoals,t.main)}
-          ${stat("生涯助攻",G.careerAssists)}
+          ${G.pos==='GK' ? stat("生涯零封",G.careerCS||0,t.main) : stat("生涯進球",G.careerGoals,t.main)}
+          ${G.pos==='GK' ? stat("生涯失球",G.careerGA||0) : stat("生涯助攻",G.careerAssists)}
           ${stat("最佳球員",(G.careerMOTM||0)+"次",t.main)}
           ${stat("榮譽",G.trophies.length,t.main)}
           ${stat("財富",moneyStr(G.money))}
@@ -1738,7 +1782,10 @@ function downloadStatsCard(){
       ctx.fillStyle=rcol; font(11,800); ctx.fillText(PA[k]||0,lx,ly+11); });
   })();
   // 六格數據
-  const cells=[['生涯出場',G.careerApps],['生涯進球',G.careerGoals],['生涯助攻',G.careerAssists],['最佳球員',(G.careerMOTM||0)+'次'],['榮譽',G.trophies.length],['財富',moneyStr(G.money)]];
+  const cells=[['生涯出場',G.careerApps],
+    G.pos==='GK'?['生涯零封',G.careerCS||0]:['生涯進球',G.careerGoals],
+    G.pos==='GK'?['生涯失球',G.careerGA||0]:['生涯助攻',G.careerAssists],
+    ['最佳球員',(G.careerMOTM||0)+'次'],['榮譽',G.trophies.length],['財富',moneyStr(G.money)]];
   const gy=abY+abH+10, gw=(W-PAD*2-16)/3, gh=56;
   cells.forEach((c,i)=>{ const cx=PAD+(i%3)*(gw+8), cy=gy+Math.floor(i/3)*(gh+8);
     roundRectPath(ctx,cx,cy,gw,gh,12); ctx.fillStyle='#13131c'; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=hexA(t.main,.28); ctx.stroke();
@@ -1787,23 +1834,25 @@ function screenHome(){
       ${miniStat("😀","士氣",Math.round(G.morale),"mor")}
     </div>
 
-    ${(()=>{ if(G.week>=seasonGames()) return ''; const opp=leagueOpponent(G.week); return opp?`
-      <div class="card tap" onclick="nav('league')" style="border-color:rgba(245,196,81,.2);">
+    ${(()=>{ if(G.week>=seasonGames()) return ''; const fix=fixtureAt(G.week); const opp=fix?fixtureOpp(fix):leagueOpponent(G.week); if(!opp) return ''; const cp=fixtureComp(fix); const isCup=cp.kind==='cup'; return `
+      <div class="card tap" onclick="nav('league')" style="border-color:${isCup?'rgba(245,196,81,.45)':'rgba(245,196,81,.2)'};">
         <div style="display:flex; align-items:center; gap:11px;">
-          <div class="muted" style="font-size:11px; white-space:nowrap;">下一戰<br>第 ${G.week+1} 輪</div>
+          <div class="muted" style="font-size:11px; white-space:nowrap; ${isCup?'color:var(--gold);font-weight:800;':''}">${isCup?`${cupIcon(cp.tier)} ${cp.label}<br>${cp.round}`:`下一戰<br>第 ${G.week+1} 輪`}</div>
           <div style="font-size:20px; opacity:.5;">${clubBadge(G.club,26)}</div>
           <div style="font-weight:800; color:var(--gold);">VS</div>
           <div style="flex:1; display:flex; align-items:center; gap:8px; min-width:0;">${clubBadge(opp.club,30)}<span style="font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${opp.n}</span></div>
-          <div style="font-size:18px; color:var(--dim);">›</div>
+          <div style="font-size:18px; color:var(--dim);">${isCup?'🏆':'›'}</div>
         </div>
-      </div>`:''; })()}
+      </div>`; })()}
 
     ${(G.suspend||0)>0?`<div class="card" style="border-color:var(--red);"><div style="display:flex;align-items:center;gap:10px;"><div style="font-size:26px;">🚫</div><div><div style="font-weight:800;color:var(--red);">停賽中</div><div class="muted">還需停賽 ${G.suspend} 場</div></div></div></div>`:""}
     ${G.injury?`<div class="card" style="border-color:var(--red);"><div style="display:flex;align-items:center;gap:10px;"><div style="font-size:26px;">🩹</div><div><div style="font-weight:800;color:var(--red);">傷病：${G.injury.name}</div><div class="muted">預計還需 ${G.injury.weeks} 週恢復</div></div></div></div>`:""}
 
     <div class="card">
       <div class="kv"><span class="k">本季出場</span><span class="v">${G.seasonApps} 場</span></div>
-      <div class="kv"><span class="k">進球 / 助攻</span><span class="v">${G.seasonGoals} ⚽ / ${G.seasonAssists} 🅰️</span></div>
+      ${G.pos==='GK'
+        ? `<div class="kv"><span class="k">零封 / 失球</span><span class="v">${G.seasonCS||0} 🧤 / ${G.seasonGA||0} 🥅</span></div>`
+        : `<div class="kv"><span class="k">進球 / 助攻</span><span class="v">${G.seasonGoals} ⚽ / ${G.seasonAssists} 🅰️</span></div>`}
       <div class="kv"><span class="k">平均評分</span><span class="v" style="color:${ratingColor(parseFloat(avgRating)||6)}">${avgRating}</span></div>
       <div class="kv"><span class="k">週薪 / 名氣</span><span class="v">${moneyStr(G.wage)} · ⭐${Math.round(G.fame)}</span></div>
     </div>
@@ -1876,8 +1925,11 @@ function screenCareer(){
         <h2>🏅 本季數據</h2>
         <div class="card">
           <div class="kv"><span class="k">出場</span><span class="v">${G.seasonApps}</span></div>
+          ${G.pos==='GK' ? `
+          <div class="kv"><span class="k">零封</span><span class="v">${G.seasonCS||0}</span></div>
+          <div class="kv"><span class="k">失球</span><span class="v">${G.seasonGA||0}</span></div>` : `
           <div class="kv"><span class="k">進球</span><span class="v">${G.seasonGoals}</span></div>
-          <div class="kv"><span class="k">助攻</span><span class="v">${G.seasonAssists}</span></div>
+          <div class="kv"><span class="k">助攻</span><span class="v">${G.seasonAssists}</span></div>`}
           <div class="kv"><span class="k">最佳球員 (MOTM)</span><span class="v">${G.seasonMOTM}</span></div>
         </div>
       </div>
@@ -1885,8 +1937,11 @@ function screenCareer(){
         <h2 style="margin-top:6px;">🌟 生涯總覽</h2>
         <div class="card">
           <div class="kv"><span class="k">生涯出場</span><span class="v">${G.careerApps}</span></div>
+          ${G.pos==='GK' ? `
+          <div class="kv"><span class="k">生涯零封</span><span class="v">${G.careerCS||0}</span></div>
+          <div class="kv"><span class="k">生涯失球</span><span class="v">${G.careerGA||0}</span></div>` : `
           <div class="kv"><span class="k">生涯進球</span><span class="v">${G.careerGoals}</span></div>
-          <div class="kv"><span class="k">生涯助攻</span><span class="v">${G.careerAssists}</span></div>
+          <div class="kv"><span class="k">生涯助攻</span><span class="v">${G.careerAssists}</span></div>`}
           <div class="kv"><span class="k">生涯平均評分</span><span class="v" style="color:${ratingColor(parseFloat(avgRating)||6)}">${avgRating}</span></div>
           <div class="kv"><span class="k">國家隊</span><span class="v">${G.caps} 場 / ${G.intlGoals} 球</span></div>
           <div class="kv"><span class="k">社群粉絲</span><span class="v">${G.socialFollowers.toFixed(1)} 萬</span></div>
@@ -2612,7 +2667,7 @@ const ROLE_MOD = {
   GK:{atk:0,ast:0,def:1.2},
   ST:{atk:1.35,ast:0.7,def:0}, LW:{atk:1.1,ast:1.05,def:0.05}, RW:{atk:1.1,ast:1.05,def:0.05},
   CAM:{atk:0.95,ast:1.45,def:0.15}, CM:{atk:0.8,ast:1.1,def:0.45}, CDM:{atk:0.45,ast:0.85,def:0.95},
-  CB:{atk:0.3,ast:0.3,def:1.25}, LB:{atk:0.55,ast:0.95,def:0.9}, RB:{atk:0.55,ast:0.95,def:0.9},
+  CB:{atk:0.15,ast:0.3,def:1.25}, LB:{atk:0.3,ast:0.95,def:0.9}, RB:{atk:0.3,ast:0.95,def:0.9},
 };
 function roleMod(){
   if(G.subRole && ROLE_MOD[G.subRole]) return ROLE_MOD[G.subRole];
@@ -2626,10 +2681,9 @@ function clubTier(club){
   for(const t of TIER_ORDER){ if(CLUBS[t] && CLUBS[t].some(c=>c.n===club.n)) return t; }
   return G.tier;
 }
-function buildLeague(){
-  if(!G || !G.club) return;
+// 建立聯賽球隊（不含賽程）
+function buildLeagueTeams(){
   const lg=G.league;
-  // 真實世界同聯賽的所有球隊
   let real=[];
   TIER_ORDER.forEach(t=>{ if(CLUBS[t]) CLUBS[t].forEach(c=>{ if(c.l===lg && c.n!==G.club.n) real.push(c); }); });
   const seen=new Set([G.club.n]); real=real.filter(c=>{ if(seen.has(c.n))return false; seen.add(c.n); return true; });
@@ -2640,15 +2694,156 @@ function buildLeague(){
   const _tb=TIER_STR[G.tier]||65;
   const teams=[ mkTeam(G.club, _tb + clamp((G.overall-_tb)*0.28,-6,9) + rand(-2,4), true) ];   // 球隊實力＝球隊等級為主、你只小幅影響
   opps.forEach(c=>{ const ct=clubTier(c); teams.push(mkTeam(c, TIER_STR[ct]+rand(-6,9), false)); });
-  const idxs=[]; for(let i=1;i<teams.length;i++) idxs.push(i);
-  const _fx=seasonGames(); const fixtures=[]; while(fixtures.length<_fx){ shuffle(idxs); idxs.forEach(i=>{ if(fixtures.length<_fx) fixtures.push(i); }); }
-  G.lg={teams, fixtures};
+  G.lg={teams};
 }
-function ensureLeague(){ if(G && G.club && !G.lg) buildLeague(); }
+// 決定本季參加哪些盃賽並建立盃賽狀態
+function buildCups(){
+  const cups={};
+  const dcup=DCUP_NAME[G.league];
+  if(dcup){ cups.dom={key:'dom', name:dcup, tier:'dom', rounds:CUP_ROUNDS.dom.slice(), idx:0, alive:true, champ:false, goals:0, apps:0, used:[]}; }
+  // 洲際盃：依上季名次資格；首季則以球隊等級判斷
+  const ccName=contCupName(G.league);
+  const contQ = (G.contQualNext!=null)? G.contQualNext : (G.tier==='strong'||G.tier==='elite');
+  if(ccName && contQ){ cups.cont={key:'cont', name:ccName, tier:'cont', rounds:CUP_ROUNDS.cont.slice(), idx:0, alive:true, champ:false, goals:0, apps:0, used:[]}; }
+  // 世俱盃：上季奪冠球隊才有資格（消耗資格）
+  if(G.clubWorldCupQual){ cups.world={key:'world', name:'世俱盃', tier:'world', rounds:CUP_ROUNDS.world.slice(), idx:0, alive:true, champ:false, goals:0, apps:0, used:[]}; G.clubWorldCupQual=false; }
+  G.cups=cups;
+  G.contQualNext=null;   // 每季重新計算
+}
+// 建立整季賽程：聯賽雙循環（主客各一）＋ 盃賽輪次穿插其中
+function buildSeasonSchedule(){
+  const teams=G.lg.teams;
+  const idxs=[]; for(let i=0;i<teams.length;i++){ if(!teams[i].me) idxs.push(i); }
+  shuffle(idxs);
+  const first=idxs.map(ti=>({comp:'league', ti, home:true}));
+  const second=idxs.map(ti=>({comp:'league', ti, home:false}));
+  shuffle(first); shuffle(second);
+  const lgFix=[...first, ...second];   // 每隊主客各一場（雙循環）
+  const Lg=lgFix.length;
+  const sched=lgFix.map((f,i)=>{ f._p=i; return f; });
+  // 盃賽輪次穿插
+  let ci=0;
+  Object.values(G.cups).forEach(c=>{
+    const R=c.rounds.length;
+    for(let r=0;r<R;r++){
+      let p;
+      if(c.tier==='world') p = Lg*(0.80 + r*0.09);         // 世俱盃排在賽季後段
+      else p = (r+1)*Lg/(R+1);
+      sched.push({comp:'cup', ck:c.key, ri:r, home:(r%2===0), _p:p + ci*0.33});
+    }
+    ci++;
+  });
+  sched.sort((a,b)=>a._p-b._p);
+  sched.forEach(f=>{ delete f._p; });
+  G.sched=sched;
+}
+function buildLeague(){
+  if(!G || !G.club) return;
+  buildLeagueTeams();
+  buildCups();
+  buildSeasonSchedule();
+}
+// 舊存檔（無 G.sched）→ 建立純聯賽賽程，長度沿用舊 seasonLen，避免賽季進度錯亂；盃賽自下季起
+function migrateSchedule(){
+  if(!G || !G.club || !G.lg || G.sched) return;
+  const teams=G.lg.teams; const idxs=[]; for(let i=0;i<teams.length;i++){ if(!teams[i].me) idxs.push(i); }
+  const L=G.seasonLen||55; const sched=[]; let k=0;
+  while(sched.length<L){ shuffle(idxs); idxs.forEach(ti=>{ if(sched.length<L) sched.push({comp:'league', ti, home:(k++%2===0)}); }); }
+  G.sched=sched; if(!G.cups) G.cups={};
+}
+function ensureLeague(){
+  if(G && G.club){
+    if(!G.lg) buildLeague();
+    else if(!G.sched) migrateSchedule();
+  }
+}
+function fixtureAt(i){ return (G && G.sched && G.sched[i])? G.sched[i] : null; }
+// 目前（下一場）賽事
+function currentFixture(){ ensureLeague(); return fixtureAt(G.week); }
+// 盃賽當前輪對手（每輪產生一次）
+function cupOppStr(c){
+  const my=TIER_STR[G.tier]||70;
+  let base;
+  if(c.tier==='dom') base = my - 14 + c.idx*4;        // 國內盃：早輪對手較弱（低級別球隊），越後越強
+  else if(c.tier==='cont') base = 74 + c.idx*2.5;     // 洲際盃：普遍強隊
+  else base = 82 + c.idx*2;                            // 世俱盃：頂級對手
+  return clamp(Math.round(base + rand(-6,6)), 42, 95);
+}
+function cupOppName(c){
+  // 依盃賽層級抽一支真實球隊名（避免重複）
+  let pool=[];
+  if(c.tier==='dom'){
+    TIER_ORDER.forEach(t=>{ (CLUBS[t]||[]).forEach(cl=>{ if(cl.l===G.league) pool.push(cl.n); }); });
+  } else if(c.tier==='cont'){
+    const name=c.name;
+    const leaguesFor = name==='歐洲冠軍聯賽'? CONT_EU : name==='解放者盃'? ["巴甲","阿甲"] : ["J聯賽","K聯賽","台灣企甲","香港超級聯賽"];
+    ["elite","strong","mid"].forEach(t=>{ (CLUBS[t]||[]).forEach(cl=>{ if(leaguesFor.includes(cl.l)) pool.push(cl.n); }); });
+  } else {
+    ["elite","strong"].forEach(t=>{ (CLUBS[t]||[]).forEach(cl=>{ pool.push(cl.n); }); });
+  }
+  pool=pool.filter(n=> n!==G.club.n && (c.used||[]).indexOf(n)<0);
+  let nm = pool.length? pick(pool) : (c.name+"勁旅");
+  if(!c.used) c.used=[]; c.used.push(nm);
+  return nm;
+}
+function ensureCupOpp(c){
+  if(!c) return;
+  if(c._oppForIdx!==c.idx){ c.oppName=cupOppName(c); c.oppStr=cupOppStr(c); c._oppForIdx=c.idx; }
+}
+// 取得某場賽事的對手（顯示與模擬共用）
+function fixtureOpp(fix){
+  if(!fix) return null;
+  if(fix.comp==='league') return (G.lg && G.lg.teams[fix.ti]) || null;
+  const c=G.cups && G.cups[fix.ck]; if(!c) return null;
+  ensureCupOpp(c);
+  return { n:c.oppName, str:c.oppStr, club:{n:c.oppName}, cup:true };
+}
+// 賽事的競賽標籤
+function fixtureComp(fix){
+  if(!fix) return {kind:'', label:'', round:''};
+  if(fix.comp==='league') return {kind:'league', label:G.league, round:''};
+  const c=G.cups && G.cups[fix.ck];
+  return {kind:'cup', tier:c?c.tier:'dom', label:c?c.name:'盃賽', round:c?c.rounds[c.idx]:''};
+}
+function cupIcon(tier){ return tier==='world'?'🌐':tier==='cont'?'🌟':'🏆'; }
 function leagueOpponent(wkIdx){
-  ensureLeague(); const lg=G.lg; if(!lg||!lg.fixtures) return null;
-  const wk=clamp(wkIdx,0,lg.fixtures.length-1);
-  return lg.teams[lg.fixtures[wk]] || null;
+  ensureLeague(); const fix=fixtureAt(wkIdx);
+  if(fix) return fixtureOpp(fix);
+  const lg=G.lg; if(!lg) return null;
+  return null;
+}
+// 移除已淘汰盃賽尚未進行的輪次（縮短賽季）
+function pruneCup(ck){
+  if(!G.sched) return;
+  for(let i=G.sched.length-1;i>=G.week;i--){ if(G.sched[i].comp==='cup' && G.sched[i].ck===ck) G.sched.splice(i,1); }
+}
+// 奪盃：記入榮譽、名氣、後續資格
+function awardCupTrophy(c){
+  const seasonLabel=`第${G.season}季`;
+  const ic=cupIcon(c.tier);
+  G.trophies.push({season:seasonLabel, name:`${ic} ${c.name}冠軍`});
+  logEvent(ic, `奪得 ${c.name}冠軍！`, "log-gold");
+  G.fame=clamp(G.fame + (c.tier==='world'?rand(8,15): c.tier==='cont'?rand(6,12): rand(2,5)), 0, 100);
+  if(c.tier==='cont'){ G._ccWinNext=true; }   // 洲際冠軍 → 明年世俱盃資格
+}
+// 結算一場盃賽（推進 / 淘汰）；回傳 {win, roundName, champ, pens}
+function settleCup(o){
+  const fix=o.fix; if(!fix || fix.comp!=='cup') return null;
+  const c=G.cups[fix.ck]; if(!c || !c.alive) return null;
+  if((o.minutes||0)>0){ c.apps=(c.apps||0)+1; c.goals=(c.goals||0)+(o.pg||0); }   // 僅上場才計個人數據
+  const roundName=c.rounds[c.idx];
+  let win=o.myGoals>o.oppGoals, pens=null;
+  if(o.myGoals===o.oppGoals){   // 淘汰賽平手 → 加時 / 十二碼
+    const p=clamp(50 + ((o.teamStr||70)-(o.oppStr||70))*1.4, 22, 78);
+    win=chance(p); pens = win?'penWin':'penLose';
+  }
+  if(win){
+    c.idx++;
+    if(c.idx>=c.rounds.length){ c.champ=true; c.alive=false; awardCupTrophy(c); }
+  } else {
+    c.alive=false; pruneCup(c.key);
+  }
+  return {win, roundName, champ:c.champ, pens, tier:c.tier, name:c.name};
 }
 function applyResult(t,gf,ga){ t.P++; t.GF+=gf; t.GA+=ga; if(gf>ga){t.W++;t.pts+=3;} else if(gf===ga){t.D++;t.pts++;} else t.L++; }
 function simPair(a,b){ const d=(a.str-b.str)+rand(-14,14); let ga,gb; if(d>8){ga=rand(1,3);gb=rand(0,1);} else if(d>-8){ga=rand(0,2);gb=rand(0,2);} else {ga=rand(0,1);gb=rand(1,3);} applyResult(a,ga,gb); applyResult(b,gb,ga); }
@@ -2769,11 +2964,14 @@ function runSkipSeason(){
 
 /* ---- 比賽核心運算（即時 / 跳過 共用） ---- */
 function rollMatch(forced){
-  const opp = leagueOpponent(G.week-1);
+  const fix = fixtureAt(G.week-1);
+  const isCup = !!(fix && fix.comp==='cup');
+  const opp = fix? fixtureOpp(fix) : leagueOpponent(G.week-1);
+  const home = fix? (fix.home!==false) : true;
   const oppStr = opp? opp.str + rand(-6,6) : TIER_STR[G.tier] + rand(-10,10);
   const teamBase = TIER_STR[G.tier] || 65;   // 球隊整體實力（代表全隊，非你一人）
-  // 球隊越強、你越弱 → 越難擠進先發（教練關係好也更容易先發）
-  const coachBonus=((G.coachRel||60)-60)*0.5;
+  // 球隊越強、你越弱 → 越難擠進先發（教練關係好也更容易先發；盃賽有時輪換陣容，年輕球員更易獲得機會）
+  const coachBonus=((G.coachRel||60)-60)*0.5 + (isCup && G.age<=22? 8:0);
   let starter = G.overall >= TIER_STR[G.tier]-10 || chance(clamp(70-(TIER_STR[G.tier]-10-G.overall)*2.2 + coachBonus, 6, 88));
   // #3 疲勞與輪換：體能過低 → 教練傾向輪休（避免硬拚受傷）；即使體能足，偶爾也會被輪換（老將更常見）
   if(starter && G.fitness<58 && chance(clamp(72-G.fitness,10,62))) starter=false;
@@ -2783,7 +2981,8 @@ function rollMatch(forced){
   const onPitch = minutes>0;
   // 勝負由「球隊實力」主導；你個人只給小幅影響（一人難定全隊，強隊照樣帶動、弱隊難靠你一人翻盤）
   const infl = onPitch? clamp((G.overall-teamBase)*0.28, -6, 9) : 0;
-  const teamStr = teamBase + infl + (onPitch? ((G.form-60)/8 + (G.morale-50)/14) : 0) - (forced?3:0);
+  const homeAdj = isCup? (home?2:-2) : (home?5:-5);   // 主場優勢（盃賽較小）
+  const teamStr = teamBase + infl + homeAdj + (onPitch? ((G.form-60)/8 + (G.morale-50)/14) : 0) - (forced?3:0);
   const diff = teamStr - oppStr + rand(-18,18);   // 加大不確定性，避免強隊勝率過高（爆冷更真實）
   let myGoals, oppGoals;
   if(diff>12){ myGoals=rand(2,4); oppGoals=rand(0,1); }
@@ -2812,7 +3011,7 @@ function rollMatch(forced){
     const injRisk = (forced?12:4) + (G.fitness<40?6:0);
     if(chance(injRisk)) injuryData=rollInjuryData();
   }
-  return {forced,opp,oppStr,teamStr,starter,minutes,myGoals,oppGoals,pg,pa,perfRoll,rating,injuryData,yellow,red};
+  return {forced,fix,isCup,home,opp,oppStr,teamStr,starter,minutes,myGoals,oppGoals,pg,pa,perfRoll,rating,injuryData,yellow,red};
 }
 
 function commitMatch(o){
@@ -2835,6 +3034,11 @@ function commitMatch(o){
   G.seasonApps++; G.careerApps++;
   G.seasonGoals+=o.pg; G.careerGoals+=o.pg;
   G.seasonAssists+=o.pa; G.careerAssists+=o.pa;
+  // 守門員：上場即記錄失球；對手掛零記一次零封
+  if(G.pos==='GK' && o.minutes>0){
+    G.seasonGA=(G.seasonGA||0)+o.oppGoals; G.careerGA=(G.careerGA||0)+o.oppGoals;
+    if(o.oppGoals===0){ G.seasonCS=(G.seasonCS||0)+1; G.careerCS=(G.careerCS||0)+1; }
+  }
   G.seasonRatingSum+=o.rating; G._careerRatingSum=(G._careerRatingSum||0)+o.rating;
   G.lastRating=o.rating;
   const motm = o.rating>=8.3;
@@ -2853,7 +3057,7 @@ function commitMatch(o){
 function simulateMatch(forced){
   G.week++;
   const o=rollMatch(forced);
-  recordLeagueResult(o);
+  recordResult(o);
   if(o.minutes===0){ processDNP(o); return; }
   const meta=commitMatch(o);
   save();
@@ -2864,7 +3068,7 @@ function simulateMatch(forced){
 function simulateMatchSilent(forced){
   G.week++;
   const o=rollMatch(forced);
-  recordLeagueResult(o);
+  recordResult(o);
   if(o.minutes===0){
     G.form=clamp(G.form-rand(2,5),0,100);
     G.morale=clamp(G.morale-rand(3,7),0,100);
@@ -2872,7 +3076,9 @@ function simulateMatchSilent(forced){
     return;
   }
   const meta=commitMatch(o);
-  if(o.pg>0 || meta.motm || o.red){
+  const cr=o.cupResult;
+  if(cr){ logEvent(cupIcon(cr.tier), `${cr.name} ${cr.roundName}：vs ${o.opp?o.opp.n:'對手'} ${o.myGoals}-${o.oppGoals}${cr.pens?(cr.pens==='penWin'?'（十二碼勝出）':'（十二碼落敗）'):''} → ${cr.champ?'奪冠！':cr.win?'晉級':'出局'}。`, cr.win?"log-gold":"log-bad"); }
+  else if(o.pg>0 || meta.motm || o.red){
     logEvent(o.red?"🟥":"⚽",`vs ${o.opp?o.opp.n:'對手'} ${o.myGoals}-${o.oppGoals}${o.pg?`，你進 ${o.pg} 球`:''}${o.pa?`、助攻 ${o.pa}`:''}${o.red?'（紅牌）':''}（評分 ${o.rating.toFixed(1)}）。`,o.red?"log-bad":"log-good");
   }
 }
@@ -2904,15 +3110,24 @@ function processDNP(o){
     ]});
 }
 
-// 停賽/未上場時，球隊仍照常出戰（更新積分榜）
+// 比賽結果分流：聯賽 → 積分榜；盃賽 → 晉級/淘汰結算
+function recordResult(o){
+  if(o.fix && o.fix.comp==='cup'){ o.cupResult=settleCup(o); }
+  else { recordLeagueResult(o); }
+}
+// 停賽/未上場時，球隊仍照常出戰（更新積分榜或盃賽晉級）
 function teamOnlyResult(){
   G.week++;
-  const opp=leagueOpponent(G.week-1);
+  const fix=fixtureAt(G.week-1);
+  const opp = fix? fixtureOpp(fix) : leagueOpponent(G.week-1);
   const oppStr = opp? opp.str+rand(-6,6): TIER_STR[G.tier]+rand(-10,10);
-  const diff=(G.overall-4)-oppStr+rand(-15,15);
+  const home = fix? (fix.home!==false) : true;
+  const teamBase = TIER_STR[G.tier]||65;
+  const homeAdj = (fix&&fix.comp==='cup')? (home?2:-2) : (home?5:-5);
+  const diff=(teamBase+homeAdj)-oppStr+rand(-15,15);
   let mg,og; if(diff>10){mg=rand(1,3);og=rand(0,1);} else if(diff>-8){mg=rand(0,2);og=rand(0,2);} else {mg=rand(0,1);og=rand(1,3);}
-  const o={opp, myGoals:mg, oppGoals:og};
-  recordLeagueResult(o);
+  const o={fix, opp, myGoals:mg, oppGoals:og, teamStr:teamBase, oppStr};
+  recordResult(o);
   return o;
 }
 function sitOutMatch(){
@@ -2960,8 +3175,17 @@ function applyInjuryData(d){
 function showMatchResult(o,meta){
   const {myGoals,oppGoals,pg,pa,rating,minutes,starter}=o;
   const won=meta.won;
-  const resultCol = won?"var(--gold)":myGoals===oppGoals?"var(--dim)":"var(--red)";
-  const resultTxt = won?"勝利":myGoals===oppGoals?"平手":"落敗";
+  const cr=o.cupResult;
+  let resultCol = won?"var(--gold)":myGoals===oppGoals?"var(--dim)":"var(--red)";
+  let resultTxt = won?"勝利":myGoals===oppGoals?"平手":"落敗";
+  let headEmoji = won?'🎉':myGoals===oppGoals?'🤝':'😔';
+  if(cr){
+    if(cr.champ){ headEmoji='🏆'; resultTxt=`${cr.name} 冠軍！`; resultCol='var(--gold)'; }
+    else if(cr.win){ headEmoji='✅'; resultTxt='晉級下一輪！'; resultCol='var(--accent)'; }
+    else { headEmoji='🚫'; resultTxt=`${cr.roundName} 出局`; resultCol='var(--red)'; }
+  }
+  const cp=fixtureComp(o.fix);
+  const compLabel = cp.kind==='cup'? `${cupIcon(cp.tier)} ${cr?cr.name:cp.label} · ${cr?cr.roundName:cp.round}${cr&&cr.pens?(cr.pens==='penWin'?' · 十二碼勝出':' · 十二碼落敗'):''}` : `${G.league} · 第 ${G.week} 輪`;
   const rc=ratingColor(rating);
   let bits=[];
   if(pg>0) bits.push(`${pg} 進球 ⚽`);
@@ -2971,14 +3195,15 @@ function showMatchResult(o,meta){
   if(o.red) bits.push("🟥 紅牌");
   if(!bits.length) bits.push("平穩發揮");
   showModalCustom(`
-    <div class="emoji">${won?'🎉':myGoals===oppGoals?'🤝':'😔'}</div>
-    <h3 style="color:${resultCol};">${resultTxt}！</h3>
-    <div class="live-league" style="margin-bottom:6px;">${G.league} · 第 ${G.week} 輪</div>
+    <div class="emoji">${headEmoji}</div>
+    <h3 style="color:${resultCol};">${resultTxt}${cr?'':'！'}</h3>
+    <div class="live-league" style="margin-bottom:6px; color:${cp.kind==='cup'?'var(--gold)':'inherit'};">${compLabel}</div>
     <div class="match-teams">
       <div class="tm"><div>${clubBadge(G.club,40)}</div><div class="nm">${G.club.n}</div></div>
       <div class="score">${myGoals} - ${oppGoals}</div>
       <div class="tm"><div>${o.opp?clubBadge(o.opp.club,40):'⚔️'}</div><div class="nm">${o.opp?o.opp.n:'對手'}</div></div>
     </div>
+    ${cr&&cr.champ?`<div class="card" style="border-color:var(--gold); background:linear-gradient(135deg,#221d0c,#12100a);"><div class="center" style="font-size:36px;">🏆</div><div class="center" style="color:var(--gold); font-weight:800;">奪得 ${cr.name}冠軍！</div></div>`:''}
     ${minutes>0?`
       <div class="card" style="margin-top:10px;">
         <div style="text-align:center; margin-bottom:8px;">
@@ -3008,8 +3233,11 @@ function toggleLiveSpeed(){
 async function startLiveMatch(forced){
   G.week++;
   const o=rollMatch(forced);
-  recordLeagueResult(o);
-  if(o.minutes===0){ processDNP(o); return; }
+  if(!o.isCup) recordLeagueResult(o);   // 聯賽先記積分（沿用原行為）
+  if(o.minutes===0){
+    if(o.isCup) o.cupResult=settleCup(o);   // 盃賽未上場也照常結算晉級
+    processDNP(o); return;
+  }
   LM={o, myScore:0, oppScore:0, minute:0};
   buildTimeline();
   renderLiveShell(o);
@@ -3018,6 +3246,7 @@ async function startLiveMatch(forced){
   // 決策可能改變進球數 → 重算評分
   o.rating = computeRating(o.pg,o.pa,o.myGoals,o.oppGoals,o.perfRoll,o.minutes);
   if(o.red) o.rating=clamp(o.rating-1.3,3.5,10); else if(o.yellow) o.rating=clamp(o.rating-0.2,3.5,10);
+  if(o.isCup) o.cupResult=settleCup(o);   // 盃賽依最終比分結算晉級/淘汰
   const meta=commitMatch(o);
   save();
   showLiveSummary(o,meta);
@@ -3057,7 +3286,7 @@ function renderLiveShell(o){
   $("#root").innerHTML=`
   <div class="live" id="liveView">
     <div class="live-top">
-      <div class="live-league">${G.league} · 第 ${G.week} 輪</div>
+      <div class="live-league">${(()=>{ const cp=fixtureComp(o.fix); return cp.kind==='cup'? `${cupIcon(cp.tier)} ${cp.label} · ${cp.round}${o.home?'（主）':'（客）'}` : `${G.league} · 第 ${G.week} 輪${o.home?'（主）':'（客）'}`; })()}</div>
       <div class="live-board">
         <div class="live-team">
           <div class="live-crest">${clubBadge(G.club,36)}</div>
@@ -3359,8 +3588,15 @@ async function flavorChance(min){
 
 function showLiveSummary(o,meta){
   const won=meta.won, draw=o.myGoals===o.oppGoals;
-  const resultCol = won?"var(--gold)":draw?"var(--dim)":"var(--red)";
-  const resultTxt = won?"勝利":draw?"平手":"落敗";
+  const cr=o.cupResult;
+  let resultCol = won?"var(--gold)":draw?"var(--dim)":"var(--red)";
+  let resultTxt = won?"勝利":draw?"平手":"落敗";
+  let headEmoji = won?'🎉':draw?'🤝':'😔';
+  if(cr){   // 盃賽以晉級/淘汰為準（含十二碼）
+    if(cr.champ){ headEmoji='🏆'; resultTxt=`${cr.name} 冠軍！`; resultCol='var(--gold)'; }
+    else if(cr.win){ headEmoji='✅'; resultTxt='晉級下一輪！'; resultCol='var(--accent)'; }
+    else { headEmoji='🚫'; resultTxt=`${cr.roundName} 出局`; resultCol='var(--red)'; }
+  }
   const rc=ratingColor(o.rating);
   let bits=[];
   bits.push(`${o.starter?'先發':'🪑 替補'}出場 ${o.minutes} 分鐘`);
@@ -3371,13 +3607,15 @@ function showLiveSummary(o,meta){
   if(o.red) bits.push("🟥 紅牌");
   if(!bits.length) bits.push("平穩發揮");
   showModalCustom(`
-    <div class="emoji">${won?'🎉':draw?'🤝':'😔'}</div>
-    <h3 style="color:${resultCol};">${resultTxt}！全場結束</h3>
+    <div class="emoji">${headEmoji}</div>
+    <h3 style="color:${resultCol};">${resultTxt}${cr?'':'！全場結束'}</h3>
+    ${cr?`<div class="center season-title" style="color:${resultCol}; margin:-4px 0 6px;">${cupIcon(cr.tier)} ${cr.name} · ${cr.roundName}${cr.pens?(cr.pens==='penWin'?' · 十二碼勝出':' · 十二碼落敗'):''}</div>`:''}
     <div class="match-teams">
       <div class="tm"><div>${clubBadge(G.club,40)}</div><div class="nm">${G.club.n}</div></div>
       <div class="score">${o.myGoals} - ${o.oppGoals}</div>
       <div class="tm"><div>${o.opp?clubBadge(o.opp.club,40):'⚔️'}</div><div class="nm">${o.opp?o.opp.n:'對手'}</div></div>
     </div>
+    ${cr&&cr.champ?`<div class="card" style="border-color:var(--gold); background:linear-gradient(135deg,#221d0c,#12100a);"><div class="center" style="font-size:40px;">🏆</div><div class="center" style="color:var(--gold); font-weight:800;">奪得 ${cr.name}冠軍！登上榮耀之巔</div></div>`:''}
     ${meta.suspMsg?`<div class="card" style="border-color:var(--red); margin-top:8px;"><div class="center" style="color:var(--red); font-weight:700;">🚫 ${meta.suspMsg}</div></div>`:''}
     <div class="card" style="margin-top:10px;">
       <div style="text-align:center; margin-bottom:8px;">
@@ -3667,45 +3905,30 @@ function endSeason(){
     }
   }
 
-  // ── (7) 球會盃賽：國內盃 + 洲際盃（歐冠/解放者盃/亞冠）+ 世俱盃 ──
+  // ── (7) 球會盃賽總結：本季已「實際出戰」的盃賽（獎盃於奪冠當下即已計入）──
+  // 安全網：若因傷停/輪空導致某盃賽尚未打完，季末以球隊實力自動補完剩餘輪次
+  Object.values(G.cups||{}).forEach(c=>{
+    let guard=0;
+    while(c.alive && !c.champ && guard++<12){
+      const oppStr=cupOppStr(c);
+      const teamBase=(TIER_STR[G.tier]||70) + (c.tier==='cont'?-2:c.tier==='world'?-4:0);
+      const diff=teamBase-oppStr+rand(-15,15);
+      let mg,og; if(diff>8){mg=rand(1,3);og=rand(0,1);} else if(diff>-8){mg=rand(0,2);og=rand(0,2);} else {mg=rand(0,1);og=rand(1,3);}
+      const win = mg>og || (mg===og && chance(clamp(50+(teamBase-oppStr)*1.4,22,78)));
+      if(win){ c.idx++; if(c.idx>=c.rounds.length){ c.champ=true; c.alive=false; awardCupTrophy(c); } }
+      else { c.alive=false; }
+    }
+  });
   const clubCups=[];
-  const tierStr=TIER_STR[G.tier]||70;
-  const knockout=(stages,base,step,goalP)=>{ // 回傳 {champ,result,goals}
-    let alive=true,champ=false,result=stages[0]+"出局",g=0;
-    for(let i=0;i<stages.length&&alive;i++){
-      if(G.pos!=="GK"&&chance(goalP)) g+=rand(0,1);
-      if(chance(base - i*step)){ if(i===stages.length-1){champ=true;result="冠軍";} }
-      else { result=stages[i]+(i===0?"出局":"止步"); alive=false; }
-    }
-    return {champ,result,goals:g};
-  };
-  if(G.seasonApps>0){
-    // 國內盃（每季都有）
-    const DCUP={"英超":"足總盃","西甲":"國王盃","德甲":"德國盃","義甲":"義大利盃","法甲":"法國盃","葡超":"葡萄牙盃","荷甲":"荷蘭盃","蘇超":"蘇格蘭盃","巴甲":"巴西盃","阿甲":"阿根廷盃","J聯賽":"天皇盃","K聯賽":"韓國足協盃","台灣企甲":"台灣足協盃","香港超級聯賽":"香港足總盃"};
-    const dcup=DCUP[G.league];
-    if(dcup){
-      const r=knockout(["32強","16強","8強","4強","決賽"], clamp(40+(G.overall-tierStr)*2,15,72), 4, 30);
-      if(r.champ){ G.trophies.push({season:seasonLabel,name:`🏆 ${dcup}冠軍`}); logEvent("🏆",`奪得 ${dcup}冠軍！`,"log-gold"); G.fame=clamp(G.fame+rand(2,5),0,100); }
-      clubCups.push({name:dcup, ...r, tier:'dom'});
-    }
-    // 洲際盃（需聯賽前段：名次≤6 或 強隊以上才有資格）
-    const EU=["英超","西甲","德甲","義甲","法甲","葡超","荷甲","蘇超"];
-    const ccName = EU.includes(G.league)?"歐洲冠軍聯賽" : (G.league==="巴甲"||G.league==="阿甲")?"解放者盃" : (G.league==="J聯賽"||G.league==="K聯賽"||G.league==="台灣企甲"||G.league==="香港超級聯賽")?"亞冠聯賽" : null;
-    const ccQual = ccName && ((rank && rank<=6) || G.tier==="strong" || G.tier==="elite");
-    if(ccQual){
-      const r=knockout(["小組賽","16強","8強","4強","決賽"], clamp(42+(G.overall-tierStr)*2,16,74), 5, 32);
-      if(r.champ){ G.trophies.push({season:seasonLabel,name:`🌟 ${ccName}冠軍`}); logEvent("🌟",`歷史性奪得 ${ccName}冠軍！`,"log-gold"); G.fame=clamp(G.fame+rand(6,12),0,100); G._ccWinNext=true; }
-      clubCups.push({name:ccName, ...r, tier:'cont'});
-    }
-    // 世俱盃（上季洲際冠軍才有資格）
-    if(G.clubWorldCupQual){
-      const r=knockout(["首圈","半準決賽","4強","決賽"], clamp(40+(G.overall-80)*2,18,66), 4, 30);
-      if(r.champ){ G.trophies.push({season:seasonLabel,name:`🌐 世俱盃冠軍`}); logEvent("🌐",`站上世界之巔，奪得世界冠軍球會盃！`,"log-gold"); G.fame=clamp(G.fame+rand(8,15),0,100); }
-      clubCups.push({name:"世俱盃", ...r, tier:'world'});
-      G.clubWorldCupQual=false;
-    }
-  }
-  // 聯賽冠軍 或 洲際盃冠軍 → 明年獲世俱盃資格（大幅提高出現機會）
+  Object.values(G.cups||{}).forEach(c=>{
+    let result;
+    if(c.champ) result='冠軍';
+    else if(c.idx>=c.rounds.length-1) result='屈居亞軍';           // 打進決賽落敗
+    else result = c.rounds[Math.min(c.idx,c.rounds.length-1)] + (c.idx===0?'首圈出局':'止步');
+    clubCups.push({name:c.name, tier:c.tier, champ:c.champ, result, goals:c.goals||0, apps:c.apps||0});
+  });
+  // 下季資格：聯賽前段/強權 → 洲際盃；聯賽冠軍或本季洲際奪冠 → 世俱盃
+  G.contQualNext = !!(contCupName(G.league) && ((rank && rank<=6) || G.tier==="strong" || G.tier==="elite"));
   if(rank===1 || G._ccWinNext){ G.clubWorldCupQual=true; }
   G._ccWinNext=false;
 
@@ -3735,6 +3958,7 @@ function endSeason(){
   // Show season summary
   const summary = {
     apps:G.seasonApps, goals:G.seasonGoals, assists:G.seasonAssists,
+    cs:G.seasonCS||0, ga:G.seasonGA||0, isGK:G.pos==='GK',
     avg:avg.toFixed(2), motm:G.seasonMOTM, income:wageIncome+sponsorIncome, trophies, natNews, potm,
     rank, teams:G.lg?G.lg.teams.length:0, tourNews, clubCups
   };
@@ -3743,9 +3967,10 @@ function endSeason(){
   G.seasonHistory.push({
     season:G.season, age:G.age,
     avg: G.seasonApps? Math.round(avg*100)/100 : 0,
-    goals:G.seasonGoals, assists:G.seasonAssists, apps:G.seasonApps
+    goals:G.seasonGoals, assists:G.seasonAssists, apps:G.seasonApps,
+    cs:G.seasonCS||0, ga:G.seasonGA||0
   });
-  logEvent("📅",`第${G.season}季結束：${G.seasonApps}場 ${G.seasonGoals}球 ${G.seasonAssists}助，平均評分 ${avg.toFixed(2)}。`,"log-good");
+  logEvent("📅",`第${G.season}季結束：${G.seasonApps}場 ${G.pos==='GK'?`${G.seasonCS||0}零封 ${G.seasonGA||0}失球`:`${G.seasonGoals}球 ${G.seasonAssists}助`}，平均評分 ${avg.toFixed(2)}。`,"log-good");
   checkMilestones();
   save();
   showSeasonSummary(summary);
@@ -3760,7 +3985,9 @@ function showSeasonSummary(s){
     </div>
     <div class="card ss-stats" style="margin-top:10px;">
       <div class="kv"><span class="k">出場</span><span class="v">${s.apps}</span></div>
-      <div class="kv"><span class="k">進球 / 助攻</span><span class="v">${s.goals} ⚽ / ${s.assists} 🅰️</span></div>
+      ${s.isGK
+        ? `<div class="kv"><span class="k">零封 / 失球</span><span class="v">${s.cs} 🧤 / ${s.ga} 🥅</span></div>`
+        : `<div class="kv"><span class="k">進球 / 助攻</span><span class="v">${s.goals} ⚽ / ${s.assists} 🅰️</span></div>`}
       <div class="kv"><span class="k">平均評分</span><span class="v" style="color:${ratingColor(parseFloat(s.avg)||6)}">${s.avg}</span></div>
       <div class="kv"><span class="k">全場最佳</span><span class="v">${s.motm} 次</span></div>
       ${s.rank?`<div class="kv"><span class="k">聯賽名次</span><span class="v" style="color:${s.rank===1?'var(--gold)':s.rank<=3?'var(--accent)':'var(--txt)'}">第 ${s.rank} / ${s.teams} 名${s.rank===1?' 🏆':''}</span></div>`:''}
@@ -3807,6 +4034,7 @@ function advanceSeason(){
   G.seasonLen=rand(50,60);   // 新賽季賽事場數 50~60
   // reset season stats
   G.seasonGoals=0; G.seasonAssists=0; G.seasonApps=0; G.seasonRatingSum=0; G.seasonMOTM=0;
+  G.seasonCS=0; G.seasonGA=0;
   G.seasonYellow=0; G.seasonRed=0; G.suspend=0;
   G.contractYears--;
   G.fitness=100; G.form=60;
@@ -4004,7 +4232,7 @@ function checkRetirement(){
 }
 function triggerRetirement(reason){
   G.retired=true; G.retireReason=reason;
-  logEvent("🎖️",`正式退役。生涯 ${G.careerApps}場 ${G.careerGoals}球 ${G.careerAssists}助。`,"log-gold");
+  logEvent("🎖️",`正式退役。生涯 ${G.careerApps}場 ${G.pos==='GK'?`${G.careerCS||0}零封 ${G.careerGA||0}失球`:`${G.careerGoals}球 ${G.careerAssists}助`}。`,"log-gold");
   save();
   render();
 }
@@ -4212,8 +4440,11 @@ function renderRetire(){
       <div class="card" style="flex:1; margin-bottom:12px;">
         <div class="season-title" style="margin-bottom:8px;">📊 生涯統計</div>
         <div class="kv"><span class="k">出場</span><span class="v">${G.careerApps}</span></div>
+        ${G.pos==='GK' ? `
+        <div class="kv"><span class="k">零封</span><span class="v">${G.careerCS||0}</span></div>
+        <div class="kv"><span class="k">失球</span><span class="v">${G.careerGA||0}</span></div>` : `
         <div class="kv"><span class="k">進球</span><span class="v">${G.careerGoals}</span></div>
-        <div class="kv"><span class="k">助攻</span><span class="v">${G.careerAssists}</span></div>
+        <div class="kv"><span class="k">助攻</span><span class="v">${G.careerAssists}</span></div>`}
         <div class="kv"><span class="k">平均評分</span><span class="v" style="color:${ratingColor(avg)}">${avg.toFixed(2)}</span></div>
         <div class="kv"><span class="k">國家隊</span><span class="v">${G.caps}場/${G.intlGoals}球</span></div>
         <div class="kv"><span class="k">名氣</span><span class="v">⭐${Math.round(G.fame)}</span></div>
@@ -4784,12 +5015,14 @@ function boot(){
   if(load() && G && !G.setup){
     migrateAttrs();
     G.screen="home";   // 每次重新載入固定回到首頁
-    // 若積分榜仍含臨時填充球隊，且該聯賽現已有更多真實球隊，重建積分榜
-    if(G.club && G.lg && G.lg.teams){
+    ensureLeague();    // 舊存檔補上賽程（無 G.sched → 建立純聯賽賽程，盃賽自下季起）
+    // 若積分榜仍含臨時填充球隊，且該聯賽現已有更多真實球隊，於季初重建（避免賽季中途打亂週次）
+    if(G.club && G.lg && G.lg.teams && G.week===0){
       const hasFiller=G.lg.teams.some(t=>/勁旅/.test(t.n));
       const realCount=TIER_ORDER.reduce((s,t)=>s+((CLUBS[t]||[]).filter(c=>c.l===G.league).length),0);
       if(hasFiller && realCount>G.lg.teams.filter(t=>!/勁旅/.test(t.n)).length) buildLeague();
     }
+    if(G.sched && G.week>G.sched.length) G.week=G.sched.length;   // 保險：週次不超過賽程
     render();
   } else {
     G=null; renderSetup();
